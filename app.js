@@ -18,8 +18,8 @@ app.use("/users",(req,res,next) => {
     res.send("<h2> Hi user!!!</h2>")
 })
 
-app.use("/form-content",(req,res,next)=>{ //this webpage is called from the /form in a post method but can also call it with get using
-    console.log(req.body)
+app.post("/form-content",(req,res,next)=>{ //this webpage is called from the /form in a post method but can also call it with get using
+    console.log(req.body)               //but i want to access this webpage only using a post method then use app.post()
     res.redirect('/')
 })
 
