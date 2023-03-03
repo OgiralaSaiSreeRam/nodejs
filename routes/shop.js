@@ -7,7 +7,7 @@ router.get("/users",(req,res,next) => {
     res.send("<h2> Hi user!!!</h2>")
 })
 
-router.use('/',(req,res,next) => { //passing a function to use where next is also a function
+router.use('/home',(req,res,next) => { //passing a function to use where next is also a function
     console.log("Inside a middleware")
     res.send("<h2>Welcome to express.js!, this is the default webpage</h2>")
     // next(); //use next in order for the next middleware functions to be used else this will be the last middle ware functions
