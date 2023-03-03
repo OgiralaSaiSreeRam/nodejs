@@ -15,9 +15,14 @@ const shopRouter= require("./routes/shop")
 
 app.use(bodyParser.urlencoded({extended:false}))
 // for the form webpages
-app.use(adminRouter) //router has become a middleware now
+app.use("/admin",adminRouter) //router has become a middleware now
 // for the welcome and default webpages
 app.use(shopRouter)
+
+app.use("/", (req,res,next)=>{
+    // can use this default one to catch the webpage not found case
+    res.status(404).send("<h4>Sorry webpage not found.</h4>")
+})
 
 app.listen(8000) //helps write clean code.
 
