@@ -5,7 +5,7 @@ const app=express()
 
 const bodyParser=require("body-parser")
 
-const adminRouter= require("./routes/admin")
+const adminData= require("./routes/admin")
 const shopRouter= require("./routes/shop")
 
 const path=require("path")
@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({extended:false}))
 app.use(express.static(path.join(__dirname, 'public'))); //serving static content by separating the css files into a separate files, wont work otherwise
 
 // for the admin webpages
-app.use("/admin",adminRouter) //router has become a middleware now
+app.use("/admin",adminData.router) //router has become a middleware now
 // for the welcome and default webpages
 app.use(shopRouter)
 

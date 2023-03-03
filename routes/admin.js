@@ -6,9 +6,13 @@ const router=express.Router()
 
 const path=require("path")
 
+const products=[]
+
 // same url but returns diff web pages for get and post
 router.post("/add-product",(req,res,next)=>{ //this webpage is called from the /form in a post method but can also call it with get using
-    console.log(req.body)               //but i want to access this webpage only using a post method then use app.post()
+    
+    products.push({ title: req.body.title });
+    console.log("admin",products)               //but i want to access this webpage only using a post method then use app.post()
     res.redirect('/shop')
 })
 
@@ -18,4 +22,5 @@ router.get("/add-product",(req,res,next)=>{ //get uses exact matching unlike use
 })
 
 
-module.exports=router
+exports.router=router
+exports.products=products
