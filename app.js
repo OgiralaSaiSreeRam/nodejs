@@ -16,7 +16,10 @@ const path=require("path")
 // must write the body parser before all the other middleware cuz parser irrespective of when the webpage will be visited
 
 app.use(bodyParser.urlencoded({extended:false}))
-// for the form webpages
+// all static content will be stored here and will be given direct access to the files unlike other.
+app.use(express.static(path.join(__dirname, 'public'))); //serving static content by separating the css files into a separate files, wont work otherwise
+
+// for the admin webpages
 app.use("/admin",adminRouter) //router has become a middleware now
 // for the welcome and default webpages
 app.use(shopRouter)
