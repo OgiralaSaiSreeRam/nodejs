@@ -22,7 +22,7 @@ const requestHeader= (req,res) => {
      req.on('end',() =>{
           let full_data=Buffer.concat(body).toString()
          //  fs.writeFileSync("NewFile.txt",full_data)//do not use this function since it blocks execution of next/any other code.
-         fs.writeFile("new_file.txt",full_data,(err)=>{
+         fs.writeFile("new_file.txt",full_data.split('=')[1],(err)=>{
              //do something when execution of the write function completes. If there is an err it will come to the argument else it will remain null
              console.log(full_data)
              res.statusCode=302
@@ -30,7 +30,7 @@ const requestHeader= (req,res) => {
      // fs.writeFileSync("NewFile.txt",full_data)//here this method is dependent on the completion of the request.on('end') blocking code
              return res.end()
      // return res.end() cannot place it here
- 
+//  in order to restart debugger with the nodemon everytime we save use "restart": true in the launch.json file 
          })
           
  
