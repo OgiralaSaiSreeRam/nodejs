@@ -8,6 +8,8 @@ const bodyParser=require("body-parser")
 const adminRouter= require("./routes/admin")
 const shopRouter= require("./routes/shop")
 
+const path=require("path")
+
 // map the routes so that all can be reachable if .use("/") is in the top then other functions will be never be reachable and also donot use next().
 // we dont want to send 2 response objects 
 
@@ -21,7 +23,7 @@ app.use(shopRouter)
 
 app.use("/", (req,res,next)=>{
     // can use this default one to catch the webpage not found case
-    res.status(404).send("<h4>Sorry webpage not found.</h4>")
+    res.status(404).sendFile(path.join(__dirname,".","views","404.html"))
 })
 
 app.listen(8000) //helps write clean code.
