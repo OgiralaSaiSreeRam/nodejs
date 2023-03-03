@@ -10,6 +10,8 @@ const shopRouter= require("./routes/shop")
 
 const path=require("path")
 
+app.set('view engine', 'pug');
+app.set('views', 'views');
 // map the routes so that all can be reachable if .use("/") is in the top then other functions will be never be reachable and also donot use next().
 // we dont want to send 2 response objects 
 
