@@ -9,8 +9,8 @@ const adminData= require("./routes/admin")
 const shopRouter= require("./routes/shop")
 
 const path=require("path")
-
-app.set('view engine', 'pug');
+app.engine("hbs",require("express-handlebars")) //since we register handlebars with hbs we need to create the view files with .hbs extension. We also need to set the view engine
+app.set('view engine', 'hbs'); // not implementing hbs, cumbersome. look into the documentation if you want  
 app.set('views', 'views');
 // map the routes so that all can be reachable if .use("/") is in the top then other functions will be never be reachable and also donot use next().
 // we dont want to send 2 response objects 
