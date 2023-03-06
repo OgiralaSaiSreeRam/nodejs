@@ -17,8 +17,10 @@ router.post("/add-product",(req,res,next)=>{ //this webpage is called from the /
 })
 
 router.get("/add-product",(req,res,next)=>{ //get uses exact matching unlike use. now this will not be executed for /form/fhfhf
-    res.sendFile(path.join(__dirname,"..","views","add-product.html"))
+    // res.sendFile(path.join(__dirname,"..","views","add-product.html"))
                     // can also use action="form"
+        res.render('add-product', { pageTitle: 'Add Product', path: '/admin/add-product' });
+
 })
 
 

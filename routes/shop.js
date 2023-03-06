@@ -13,8 +13,9 @@ router.get("/users",(req,res,next) => {
 
 router.use('/shop',(req,res,next) => { //passing a function to use where next is also a function
     console.log("Inside a middleware")
-    // res.sendFile(path.join(__dirname,"..","views","shop.pug"))
-    res.render("shop")
+    // res.sendFile(path.join(__dirname,"..","views","shop.html"))
+    res.render('shop', {prods: products, pageTitle: 'Shop', path: '/'});
+    //need to send js objects to the render method do that the pug file/template engine can load it
     console.log("shop",products)
     // next(); //use next in order for the next middleware functions to be used else this will be the last middle ware functions
 })
