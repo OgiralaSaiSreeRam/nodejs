@@ -28,7 +28,8 @@ app.use(shopRouter)
 
 app.use("/", (req,res,next)=>{
     // can use this default one to catch the webpage not found case
-    res.status(404).sendFile(path.join(__dirname,".","views","404.html"))
+    // res.status(404).sendFile(path.join(__dirname,".","views","404.html"))
+    res.status(404).render("404")
 })
 
 app.listen(8000) //helps write clean code.
