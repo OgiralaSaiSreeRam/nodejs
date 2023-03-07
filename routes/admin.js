@@ -1,18 +1,18 @@
-const express = require("express")
+const path = require('path');
 
-// const bodyParser=require("body-parser") //not needed here cuz it is wriiten in the app file and that is enough  
+const express = require('express');
 
-const router=express.Router()
+const adminController = require('../controllers/admin');
 
-const path=require("path")
+const router = express.Router();
 
-// const products=[] not needed here now
+// /admin/add-product => GET
+router.get('/add-product', adminController.getAddProduct);
 
-const products = require('../controllers/productControllers.js')
+// /admin/products => GET
+router.get('/products', adminController.getProducts);
 
-// same url but returns diff web pages for get and post
-router.post("/add-product",products.postAddProduct)
+// /admin/add-product => POST
+router.post('/add-product', adminController.postAddProduct);
 
-router.get("/add-product",products.getAddProduct)
-
-exports.router=router
+module.exports = router;
