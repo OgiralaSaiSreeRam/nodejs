@@ -6,23 +6,13 @@ const router=express.Router()
 
 const path=require("path")
 
-const products=[]
+// const products=[] not needed here now
+
+const products = require('../controllers/productControllers.js')
 
 // same url but returns diff web pages for get and post
-router.post("/add-product",(req,res,next)=>{ //this webpage is called from the /form in a post method but can also call it with get using
-    
-    products.push({ title: req.body.title });
-    console.log("admin",products)               //but i want to access this webpage only using a post method then use app.post()
-    res.redirect('/shop')
-})
+router.post("/add-product",products.postAddProduct)
 
-router.get("/add-product",(req,res,next)=>{ //get uses exact matching unlike use. now this will not be executed for /form/fhfhf
-    // res.sendFile(path.join(__dirname,"..","views","add-product.html"))
-                    // can also use action="form"
-        res.render('add-product', { pageTitle: 'Add Product', path: '/admin/add-product' });
-
-})
-
+router.get("/add-product",products.getAddProduct)
 
 exports.router=router
-exports.products=products

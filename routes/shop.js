@@ -4,20 +4,15 @@ const router = express.Router()
 
 const path=require("path")
 
-const products=require("./admin").products
+// const products=require("./admin").products not needed anymore
+
+const getProducts= require('../controllers/productControllers.js')
 
 router.get("/users",(req,res,next) => {
     console.log("inside the users middle function")
     res.send("<h2> Hi user!!!</h2>")
 })
 
-router.use('/shop',(req,res,next) => { //passing a function to use where next is also a function
-    console.log("Inside a middleware")
-    // res.sendFile(path.join(__dirname,"..","views","shop.html"))
-    res.render('shop', {prods: products, pageTitle: 'Shop', path: '/'});
-    //need to send js objects to the render method do that the pug file/template engine can load it
-    console.log("shop",products)
-    // next(); //use next in order for the next middleware functions to be used else this will be the last middle ware functions
-})
+router.use('/shop',getProducts.getProducts)
 
 module.exports = router

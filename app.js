@@ -10,6 +10,8 @@ const shopRouter= require("./routes/shop")
 
 const path=require("path")
 
+const errorControl = require('./controllers/errorControl.js');
+
 app.set('view engine', 'ejs'); //ejs and pug are built in so need to import and stuff, can directly use in the view engine like this
 app.set('views', 'views'); //ejs does not support extending/reusing the already written layout views, need a workaround
 // map the routes so that all can be reachable if .use("/") is in the top then other functions will be never be reachable and also donot use next().
@@ -26,11 +28,7 @@ app.use("/admin",adminData.router) //router has become a middleware now
 // for the welcome and default webpages
 app.use(shopRouter)
 
-app.use("/", (req,res,next)=>{
-    // can use this default one to catch the webpage not found case
-    // res.status(404).sendFile(path.join(__dirname,".","views","404.html"))
-    res.status(404).render("404",{pageTitle: "Page not found",path:"/404"})
-})
+app.use("/", errorControl.PageNotFound)
 
 app.listen(8000) //helps write clean code.
 
