@@ -9,9 +9,9 @@ const adminData= require("./routes/admin")
 const shopRouter= require("./routes/shop")
 
 const path=require("path")
-app.engine("hbs",require("express-handlebars")) //since we register handlebars with hbs we need to create the view files with .hbs extension. We also need to set the view engine
-app.set('view engine', 'hbs'); // not implementing hbs, cumbersome. look into the documentation if you want  
-app.set('views', 'views');
+
+app.set('view engine', 'ejs'); //ejs and pug are built in so need to import and stuff, can directly use in the view engine like this
+app.set('views', 'views'); //ejs does not support extending/reusing the already written layout views, need a workaround
 // map the routes so that all can be reachable if .use("/") is in the top then other functions will be never be reachable and also donot use next().
 // we dont want to send 2 response objects 
 
@@ -29,7 +29,7 @@ app.use(shopRouter)
 app.use("/", (req,res,next)=>{
     // can use this default one to catch the webpage not found case
     // res.status(404).sendFile(path.join(__dirname,".","views","404.html"))
-    res.status(404).render("404")
+    res.status(404).render("404",{pageTitle: "Page not found",path:"/404"})
 })
 
 app.listen(8000) //helps write clean code.

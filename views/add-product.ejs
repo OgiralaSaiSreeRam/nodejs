@@ -1,0 +1,18 @@
+    <%- include('layouts/head.ejs') %>
+    <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/forms.css">
+</head>
+
+<body>
+    <%- include('layouts/nav.ejs') %>
+    <main>
+        <form class="product-form" action="/admin/add-product" method="POST">
+            <div class="form-control">
+                <label for="title">Title</label>
+                <input type="text" name="title" id="title">
+            </div>
+
+            <button class='btn' type="submit">Add Product</button>
+        </form>
+    </main>
+<%- include('layouts/end.ejs') %>
