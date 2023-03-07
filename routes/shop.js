@@ -1,18 +1,17 @@
-const express=require("express")
+const path = require('path');
 
-const router = express.Router()
+const express = require('express');
 
-const path=require("path")
+const shopController = require('../controllers/shop');
 
-// const products=require("./admin").products not needed anymore
+const router = express.Router();
 
-const getProducts= require('../controllers/productControllers.js')
+router.get('/', shopController.getIndex);
 
-router.get("/users",(req,res,next) => {
-    console.log("inside the users middle function")
-    res.send("<h2> Hi user!!!</h2>")
-})
+router.get('/products', shopController.getProducts);
 
-router.use('/shop',getProducts.getProducts)
+router.get('/cart', shopController.getCart);
 
-module.exports = router
+router.get('/checkout', shopController.getCheckout);
+
+module.exports = router;

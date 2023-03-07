@@ -24,7 +24,7 @@ app.use(bodyParser.urlencoded({extended:false}))
 app.use(express.static(path.join(__dirname, 'public'))); //serving static content by separating the css files into a separate files, wont work otherwise
 
 // for the admin webpages
-app.use("/admin",adminData.router) //router has become a middleware now
+app.use("/admin",adminData) //router has become a middleware now
 // for the welcome and default webpages
 app.use(shopRouter)
 
