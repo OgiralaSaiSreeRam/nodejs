@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path'); //
+// undoing a commit. and then pushing a new commit to remote after rebasing
 
 module.exports = class Product {
   constructor(t) {
