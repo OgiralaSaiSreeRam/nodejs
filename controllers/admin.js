@@ -29,3 +29,32 @@ exports.getProducts = (req, res, next) => {
     });
   });
 };
+
+exports.getEditProduct = (req, res, next) => {
+  const editMode = req.query.edit;
+  if (!editMode) {
+    return res.redirect('/');
+  }
+  const prodId = req.params.productId;
+  Product.fetchByID(prodId, product => {
+    if (!product) {
+      return res.redirect('/');
+    }
+    res.render('admin/edit-product', {
+      pageTitle: 'Edit Product',
+      path: '/admin/edit-product',
+      editing: editMode,
+      product: product
+    });
+  });
+};
+
+exports.postEditProduct = (req, res, next) => {
+  const prodId = req.body.productID;
+  console.log(prodId);
+  const new_product= new Product(req.body.title,req.body.imageUrl,req.body.description,req.body.price)
+  new_product.productID=prodId
+  new_product.save()
+
+  res.redirect('/admin/products')
+  }
