@@ -31,12 +31,22 @@ module.exports = class Product {
   save() {
     getProductsFromFile(products => {
       // console.log(this); brilliant execution
-      this.productID=Math.random().toString()
+      if (this.productID) {
+        const existingProductIndex = products.findIndex(
+          prod => prod.productID === this.productID
+        );
+        const updatedProducts = [...products];
+        updatedProducts[existingProductIndex] = this;
+        fs.writeFile(p, JSON.stringify(updatedProducts),err => {
+          console.log(err);
+        })}
+      else{
+        this.productID=Math.random().toString()
       products.push(this);
       fs.writeFile(p, JSON.stringify(products), err => {
         console.log(err);
       });
-    })
+  }})
   }
 
   static fetchAll(cb) {
@@ -48,5 +58,5 @@ module.exports = class Product {
       const prod= products.find(p => p.productID===id)
       cb(prod)
     })
-  }
-};
+  };
+}
