@@ -49,6 +49,18 @@ module.exports = class Product {
   }})
   }
 
+  static deleteByID(id){
+    getProductsFromFile(products =>{
+      const updatedProducts= products.filter(prod => prod.productID !== id)
+      fs.writeFile(p, JSON.stringify(updatedProducts),err => {
+        console.log(err);
+      })
+    })
+    // now delete from the delete all the items of this product from the cart if any
+  }
+
+  
+
   static fetchAll(cb) {
     getProductsFromFile(cb)
   }

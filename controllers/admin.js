@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const Cart= require('../models/cart')
 
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/add-product', {
@@ -54,7 +55,16 @@ exports.postEditProduct = (req, res, next) => {
   console.log(prodId);
   const new_product= new Product(req.body.title,req.body.imageUrl,req.body.description,req.body.price)
   new_product.productID=prodId
-  new_product.save()
+  new_product.save() 
+  // now change the price of the cart items if the price was modified in the process of editing.
 
   res.redirect('/admin/products')
+  }
+
+  exports.deleteProduct= (req, res, next) =>{
+    const prodId=req.body.id
+    const price= req.body.price
+    Product.deleteByID(prodId)
+    Cart.deleteByID(prodId,price) //can also delete by object reference by calling the method without using static
+    res.redirect('/admin/products')
   }
