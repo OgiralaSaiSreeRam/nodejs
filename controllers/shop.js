@@ -27,6 +27,13 @@ exports.getCart = (req, res, next) => {
   });
 };
 
+exports.PostCart = (req, res, next) => {
+  
+  // add product to cart and redirect
+  res.redirect('/cart');
+
+};
+
 exports.getCheckout = (req, res, next) => {
   res.render('shop/checkout', {
     path: '/checkout',
@@ -38,8 +45,11 @@ exports.getProductDetails= (req,res,next) => {
   // fetch just the product needed i.e prodID from the url
   const prodID=req.params.productID
   console.log(prodID);
-  res.render('shop/product-detail',{
-    path: '/productDetail',
-    pageTitle: 'Product Details'
-  })
+  Product.fetchByID( prodID,product=>{
+    console.log(product.title);
+    res.render('shop/product-detail',{product: product,
+      path: '/products',
+      pageTitle: 'Product Details'
+    })});
+  
 }
