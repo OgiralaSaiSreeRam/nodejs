@@ -33,3 +33,13 @@ exports.getCheckout = (req, res, next) => {
     pageTitle: 'Checkout'
   });
 };
+
+exports.getProductDetails= (req,res,next) => {
+  // fetch just the product needed i.e prodID from the url
+  const prodID=req.params.productID
+  console.log(prodID);
+  res.render('shop/product-detail',{
+    path: '/productDetail',
+    pageTitle: 'Product Details'
+  })
+}
