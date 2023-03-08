@@ -24,11 +24,13 @@ module.exports = class Product {
     this.imageUrl = imageUrl;
     this.description = description;
     this.price = price;
+
   }
 
   save() {
     getProductsFromFile(products => {
       // console.log(this); brilliant execution
+      this.productID=Math.random()
       products.push(this);
       fs.writeFile(p, JSON.stringify(products), err => {
         console.log(err);

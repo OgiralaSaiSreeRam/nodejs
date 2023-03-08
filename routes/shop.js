@@ -10,6 +10,11 @@ router.get('/', shopController.getIndex);
 
 router.get('/products', shopController.getProducts);
 
+// router.get('/products/delete',shopController.getProducts)
+
+router.get('/products/:productID',shopController.getProductDetails)
+// do not write any router functions below the above line cuz the /:productID tells that it could be anything after the /products, so it will never reach the subsequent route function.
+
 router.get('/cart', shopController.getCart);
 
 router.get('/checkout', shopController.getCheckout);
