@@ -1,6 +1,6 @@
 
 const express=require("express") //clearly define the imports; all core modules in one palce, third party modules in another 
-const db=require('./util/database')
+const sequelize=require('./util/database')
 const app=express()
 
 const bodyParser=require("body-parser")
@@ -23,10 +23,17 @@ app.use(bodyParser.urlencoded({extended:false}))
 // all static content will be stored here and will be given direct access to the files unlike other.
 app.use(express.static(path.join(__dirname, 'public'))); //serving static content by separating the css files into a separate files, wont work otherwise
 
+
+sequelize.sync().then( result => {
+// console.log(result);
+}).catch(err => {
+    console.log(err);
+})
 // for the admin webpages
 app.use("/admin",adminData) //router has become a middleware now
 // for the welcome and default webpages
 app.use(shopRouter)
+
 
 app.use("/", errorControl.PageNotFound)
 

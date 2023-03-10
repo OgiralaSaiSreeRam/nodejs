@@ -3,29 +3,28 @@ const Cart = require('../models/cart');
 
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll().then( ([rows,fieldData]) => {
-    // console.log(result[0])
+  Product.findAll().then(products => {
     res.render("shop/product-list", {
-      prods:rows,
+      prods:products,
       pageTitle:'Shop',
       path:'/products'
     })
-}).catch(err=>{
+  }).catch(err =>{
     console.log(err);
-});
+  })
 };
 
 exports.getIndex = (req, res, next) => {
-  Product.fetchAll().then( ([rows,fieldData]) => {
-    // console.log(result[0])
+  
+  Product.findAll().then(products =>{
     res.render("shop/index", {
-      prods:rows,
+      prods:products,
       pageTitle:'Shop',
       path:'/'
     })
-}).catch(err=>{
+  }).catch(err=>{
     console.log(err);
-});
+  })
 };
 
 exports.getCart = (req, res, next) => {
@@ -79,9 +78,11 @@ exports.getProductDetails= (req,res,next) => {
   // fetch just the product needed i.e prodID from the url
   const prodID=req.params.productID
   console.log(prodID);
-  Product.fetchByID(prodID).then(([product,fieldDetails])=>{
-    console.log(product);
-    res.render('shop/product-detail',{product: product[0],
+  // Product.findAll({where: productID=2}).then(....)... also works
+  Product.findByPk(prodID).then((product)=>{
+    console.log(product.productID);
+    res.render('shop/product-detail',{
+      product: product,
       path: '/products',
       pageTitle: 'Product Details'
     })}).catch(err=>console.log(err));

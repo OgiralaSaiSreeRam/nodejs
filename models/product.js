@@ -1,42 +1,31 @@
-const fs = require('fs');
-const { get } = require('http');
-const path = require('path'); //
+const Sequelize = require('sequelize')
 
-const db=require('../util/database')
+const sequelize = require('../util/database')
 
-// undoing a commit. and then pushing a new commit to remote after rebasing
-const p = path.join(
-  path.dirname(process.mainModule.filename),
-  'data',
-  'products.json'
-);
+const Product = sequelize.define('product',{
 
-module.exports = class Product {
-  constructor(title, imageUrl, description, price) {
-    this.title = title;
-    this.imageUrl = imageUrl;
-    this.description = description;
-    this.price = price;
-
+  productID: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    allowNull: false,
+    primaryKey: true
+  },
+  title:{
+    type:Sequelize.STRING
+  },
+  price:{
+    type:Sequelize.DOUBLE,
+    allowNull: false
+  },
+  imageUrl:{
+    type: Sequelize.STRING,
+    allowNull: false,
+    defaultValue: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNpoKNNzR1EbNy8sPvwfz1_pHxmK37a7cD8Q&usqp=CAU"
+  },
+  description: {
+    type: Sequelize.STRING
   }
 
-  save() {
-    return db.execute('insert into products (title,price,description,imageUrl) values (?,?,?,?)',[this.title,this.price,this.description,this.imageUrl])
-  }
+});
 
-  static deleteByID(id){
-    
-    // now delete from the delete all the items of this product from the cart if any
-  }
-
-  
-
-  static fetchAll(cb) {
-    return db.execute('select * from products')
-  }
-
-  static fetchByID(id){
-
-    return db.execute('select * from products where productID=?',[id])
-  }
-}
+module.exports=Product

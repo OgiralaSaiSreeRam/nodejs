@@ -16,22 +16,31 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
-  const product = new Product(title, imageUrl, description, price);
-  product.save().then(()=>{
+  
+  Product.create({
+    title:title,
+    price: price,
+    imageUrl: imageUrl,
+    description: description
+  }).then(result =>{
+    console.log('Added the new product in the db');
     res.redirect('/')
-  }).catch(err=>console.log(err));
+  }).catch(err=>{
+    console.log(err);
+  })
   
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll(products => {
+  Product.findAll().then(products => {
     res.render('admin/products', {
       prods: products,
       pageTitle: 'Admin Products',
       path: '/admin/products'
     });
-  });
-};
+  })
+  .catch(err => console.log(err))
+}
 
 exports.getEditProduct = (req, res, next) => {
   const editMode = req.query.edit;
@@ -39,7 +48,7 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect('/');
   }
   const prodId = req.params.productId;
-  Product.fetchByID(prodId, product => {
+  Product.findByPk(prodId).then( product => {
     if (!product) {
       return res.redirect('/');
     }
@@ -54,19 +63,36 @@ exports.getEditProduct = (req, res, next) => {
 
 exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.productID;
-  console.log(prodId);
-  const new_product= new Product(req.body.title,req.body.imageUrl,req.body.description,req.body.price)
-  new_product.productID=prodId
-  new_product.save() 
-  // now change the price of the cart items if the price was modified in the process of editing.
+  // console.log(prodId);
 
-  res.redirect('/admin/products')
+  
+  // now change the price of the cart items if the price was modified in the process of editing.
+  Product.findByPk(prodId).then( product => {
+    if (!product) {
+      return res.redirect('/');
+    }
+    product.title=req.body.title;
+    product.price=req.body.price;
+    product.imageUrl=req.body.imageUrl;
+    product.description=req.body.description;
+
+    return product.save(); //another async function, second then is for the 
+  }).then(result=>{
+    console.log('saved successfully');
+    res.redirect('/admin/products')
+  }).catch(err=>console.log(err));
+  
   }
 
   exports.deleteProduct= (req, res, next) =>{
     const prodId=req.body.id
     const price= req.body.price
-    Product.deleteByID(prodId)
-    Cart.deleteByID(prodId,price) //can also delete by object reference by calling the method without using static
-    res.redirect('/admin/products')
+    Product.findByPk(prodId).then(product =>{
+      return product.destroy() // another async function hence must use another then
+
+    }).then(result=>{
+      res.redirect('/admin/products')
+    }).catch()
+
+    
   }
