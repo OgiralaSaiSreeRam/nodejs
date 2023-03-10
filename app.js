@@ -1,6 +1,6 @@
 
 const express=require("express") //clearly define the imports; all core modules in one palce, third party modules in another 
-
+const db=require('./util/database')
 const app=express()
 
 const bodyParser=require("body-parser")

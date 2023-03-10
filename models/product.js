@@ -1,24 +1,16 @@
 const fs = require('fs');
 const { get } = require('http');
 const path = require('path'); //
+
+const db=require('../util/database')
+
 // undoing a commit. and then pushing a new commit to remote after rebasing
 const p = path.join(
   path.dirname(process.mainModule.filename),
   'data',
   'products.json'
 );
-const getProductsFromFile = cb => {fs.readFile(p, (err, fileContent) => {
-  if (err) {
-    // cb([]); no file content is not an error
-    console.log(err);
-  }
-  // console.log(fileContent);
-  if(fileContent.length>0){
-    cb(JSON.parse(fileContent)); //after running the callback the remaining function is returned???--no // basically throwing an error previoulsy cuz of json.parse(null)
-    return
-  }
-  cb([]);
-});}
+
 module.exports = class Product {
   constructor(title, imageUrl, description, price) {
     this.title = title;
@@ -29,46 +21,22 @@ module.exports = class Product {
   }
 
   save() {
-    getProductsFromFile(products => {
-      // console.log(this); brilliant execution
-      if (this.productID) {
-        const existingProductIndex = products.findIndex(
-          prod => prod.productID === this.productID
-        );
-        const updatedProducts = [...products];
-        updatedProducts[existingProductIndex] = this;
-        fs.writeFile(p, JSON.stringify(updatedProducts),err => {
-          console.log(err);
-        })}
-      else{
-        this.productID=Math.random().toString()
-      products.push(this);
-      fs.writeFile(p, JSON.stringify(products), err => {
-        console.log(err);
-      });
-  }})
+    return db.execute('insert into products (title,price,description,imageUrl) values (?,?,?,?)',[this.title,this.price,this.description,this.imageUrl])
   }
 
   static deleteByID(id){
-    getProductsFromFile(products =>{
-      const updatedProducts= products.filter(prod => prod.productID !== id)
-      fs.writeFile(p, JSON.stringify(updatedProducts),err => {
-        console.log(err);
-      })
-    })
+    
     // now delete from the delete all the items of this product from the cart if any
   }
 
   
 
   static fetchAll(cb) {
-    getProductsFromFile(cb)
+    return db.execute('select * from products')
   }
 
-  static fetchByID(id,cb){
-    getProductsFromFile(products=>{
-      const prod= products.find(p => p.productID===id)
-      cb(prod)
-    })
-  };
+  static fetchByID(id){
+
+    return db.execute('select * from products where productID=?',[id])
+  }
 }

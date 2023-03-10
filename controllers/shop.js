@@ -3,23 +3,29 @@ const Cart = require('../models/cart');
 
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll(products => {
-    res.render('shop/product-list', {
-      prods: products,
-      pageTitle: 'All Products',
-      path: '/products'
-    });
-  });
+  Product.fetchAll().then( ([rows,fieldData]) => {
+    // console.log(result[0])
+    res.render("shop/product-list", {
+      prods:rows,
+      pageTitle:'Shop',
+      path:'/products'
+    })
+}).catch(err=>{
+    console.log(err);
+});
 };
 
 exports.getIndex = (req, res, next) => {
-  Product.fetchAll(products => {
-    res.render('shop/index', {
-      prods: products,
-      pageTitle: 'Shop',
-      path: '/'
-    });
-  });
+  Product.fetchAll().then( ([rows,fieldData]) => {
+    // console.log(result[0])
+    res.render("shop/index", {
+      prods:rows,
+      pageTitle:'Shop',
+      path:'/'
+    })
+}).catch(err=>{
+    console.log(err);
+});
 };
 
 exports.getCart = (req, res, next) => {
@@ -38,9 +44,7 @@ exports.getCart = (req, res, next) => {
         }
       }
       
-      productList.totalPrice=cart.totalPrice
       console.log(productList);
-
       res.render('shop/cart', {
         path: '/cart',
         pageTitle: 'Your Cart',
@@ -75,12 +79,12 @@ exports.getProductDetails= (req,res,next) => {
   // fetch just the product needed i.e prodID from the url
   const prodID=req.params.productID
   console.log(prodID);
-  Product.fetchByID( prodID,product=>{
-    console.log(product.title);
-    res.render('shop/product-detail',{product: product,
+  Product.fetchByID(prodID).then(([product,fieldDetails])=>{
+    console.log(product);
+    res.render('shop/product-detail',{product: product[0],
       path: '/products',
       pageTitle: 'Product Details'
-    })});
+    })}).catch(err=>console.log(err));
   
 }
 
