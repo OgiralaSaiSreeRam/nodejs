@@ -1,5 +1,6 @@
 const Product = require('../models/product');
-const Cart= require('../models/cart')
+const Cart= require('../models/cart');
+const { where } = require('sequelize');
 
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/add-product', {
@@ -16,13 +17,17 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
+
+  req.user.createProduct({
+    title: title,
+    price:price,
+    imageUrl: (imageUrl) ? imageUrl : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNpoKNNzR1EbNy8sPvwfz1_pHxmK37a7cD8Q&usqp=CAU',
+    description:description,
+    userUserID: req.user.userID
+  }) //this method is created by sequelize based on the asssociation since we have given hasMany association 
+// check the docs for more info
   
-  Product.create({
-    title:title,
-    price: price,
-    imageUrl: imageUrl,
-    description: description
-  }).then(result =>{
+.then(result =>{
     console.log('Added the new product in the db');
     res.redirect('/')
   }).catch(err=>{
@@ -32,8 +37,8 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.findAll().then(products => {
-    res.render('admin/products', {
+  req.user.getProducts().then(products => {
+      res.render('admin/products', {
       prods: products,
       pageTitle: 'Admin Products',
       path: '/admin/products'
@@ -48,8 +53,9 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect('/');
   }
   const prodId = req.params.productId;
-  Product.findByPk(prodId).then( product => {
-    if (!product) {
+req.user.getProducts({where:{productID:prodId}}).then( products => {
+  const product=products[0]  
+  if (!product) {
       return res.redirect('/');
     }
     res.render('admin/edit-product', {

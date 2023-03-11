@@ -28,41 +28,27 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  Cart.getCart(cart =>{
-    let productList=[]
-    Product.fetchAll(products =>{
-      console.log(products);
-      for(let prod of products){
-        let cart_prod={productData:{},qty:0}
-          console.log(prod);
-          let productMatch=cart.products.find(p => p.id===prod.productID)
-        if (productMatch){
-          cart_prod.productData=prod
-          cart_prod.qty=productMatch.qty
-          productList.push(cart_prod)
-        }
-      }
-      
-      console.log(productList);
+  req.user.getCart().then(cart =>{
+  
+    cart.getProducts().then(products=>{
+      // console.log(products);
       res.render('shop/cart', {
         path: '/cart',
         pageTitle: 'Your Cart',
         products: productList
       });
+
+    }).catch(err=>console.log(err))
+      
     })
     
-  })
-  
-};
+  }
+
 
 exports.PostCart = (req, res, next) => {
   
   // add product to cart and redirect
-  const prodId = req.body.productId;
-  Product.fetchByID(prodId, product => {
-    console.log(product.productID,product.price);
-    Cart.addProduct(prodId, product.price);
-  });
+  
   res.redirect('/cart');
 
 };
