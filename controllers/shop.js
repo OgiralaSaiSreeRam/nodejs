@@ -77,15 +77,21 @@ exports.getCart = (req, res, next) => {
   }
 
   exports.getOrders=(req,res,next)=>{
-    req.user.getOrders({include: ['products']}).then(orders=>{ //returns an array of orders with products per order. This is only becuase we defined an association between the orders and products in app.js.
+    req.user.getOrders().then(orders=>{ //returns an array of orders with products per order. This is only becuase we defined an association between the orders and products in app.js.
       //alternatively we can fetch the products associated with the orders ourselves and send it to the response.
       // return orders.getProducts()
+      // can use orders.findByPk(...) but i have only one order
+      return orders[0].getProducts() //since there are many orders we must specify for which order we want to get the products. For Cart it was one to many relationship, here many to many
+      
+    }).then(products=>{
+      console.log(products); 
       res.render("shop/orders",{
         pageTitle: "Orders",
         path: '/orders',
-        orders: orders
+        orders: products
       })
-    }).catch(err=>{
+    })
+    .catch(err=>{
       console.log(err);
     })
     //input this in the last then block
