@@ -20,7 +20,7 @@ const Product = sequelize.define('product',{
   imageUrl:{
     type: Sequelize.STRING,
     allowNull: false,
-    defaultValue: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNpoKNNzR1EbNy8sPvwfz1_pHxmK37a7cD8Q&usqp=CAU"
+    // defaultValue: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNpoKNNzR1EbNy8sPvwfz1_pHxmK37a7cD8Q&usqp=CAU"
   },
   description: {
     type: Sequelize.STRING
