@@ -5,6 +5,8 @@ const Product=require('./models/product')
 const User=require('./models/user')
 const CartItem=require('./models/cart-item')
 const Cart=require('./models/cart')
+const Order=require('./models/order')
+const OrderItem=require('./models/order-item')
 const app=express()
 
 const bodyParser=require("body-parser")
@@ -15,6 +17,7 @@ const shopRouter= require("./routes/shop")
 const path=require("path")
 
 const errorControl = require('./controllers/errorControl.js');
+
 
 app.set('view engine', 'ejs'); //ejs and pug are built in so need to import and stuff, can directly use in the view engine like this
 app.set('views', 'views'); //ejs does not support extending/reusing the already written layout views, need a workaround
@@ -33,6 +36,11 @@ User.hasOne(Cart)
 Cart.belongsTo(User)
 Cart.belongsToMany(Product,{through: CartItem})
 Product.belongsToMany(Cart,{through: CartItem})
+
+Order.belongsTo(User) //imagine that each record i.e each order should belong to one user
+User.hasMany(Order) //each user will have multiple orders
+Order.belongsToMany(Product,{through: OrderItem}) //each order will have multiple products
+Product.belongsToMany(Order,{through:OrderItem}) //each product will have/will be present in multiple orders
 
 app.use((req,res,next)=>{ //this is absically executed for every request
     User.findByPk(1).then(user=>{
