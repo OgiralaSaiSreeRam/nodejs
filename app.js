@@ -6,7 +6,7 @@ const app=express()
 const bodyParser=require("body-parser")
 
 const adminData= require("./routes/admin")
-// const shopRouter= require("./routes/shop")
+const shopRouter= require("./routes/shop")
 
 const path=require("path")
 
@@ -35,7 +35,7 @@ mongoConnect(client=>{
 // // for the admin webpages
 app.use("/admin",adminData) //router has become a middleware now
 // // for the welcome and default webpages
-// app.use(shopRouter)
+app.use(shopRouter)
 // // app.listen(8000)
 
 app.use("/", errorControl.PageNotFound)

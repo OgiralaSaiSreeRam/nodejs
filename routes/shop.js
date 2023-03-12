@@ -15,13 +15,13 @@ router.get('/products', shopController.getProducts);
 router.get('/products/:productID',shopController.getProductDetails)
 // do not write any router functions below the above line cuz the /:productID tells that it could be anything after the /products, so it will never reach the subsequent route function.
 
-router.get('/cart', shopController.getCart);
+// router.get('/cart', shopController.getCart);
 
-router.post('/cart', shopController.postCart);
+// router.post('/cart', shopController.postCart);
 
-router.post('/cart-delete-item',shopController.deleteItem)
-router.post('/create-order',shopController.createOrder)
-router.get('/orders',shopController.getOrders)
+// router.post('/cart-delete-item',shopController.deleteItem)
+// router.post('/create-order',shopController.createOrder)
+// router.get('/orders',shopController.getOrders)
 
 
 router.get('/checkout', shopController.getCheckout);
