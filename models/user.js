@@ -61,27 +61,38 @@ class User{
       }
       // {cart:{items:[]}}
 
-      addOrder(){
-        const db=getDb() //an order must also be associated with the user
-        return db.collection('orders').insertOne(this.cart).then(()=>{
-          this.cart={items:[]}
-          return db.collection('users').updateOne({_id:this._id},{$set:{cart:{items:[]}}})
-        })
-        .catch(err=>console.log(err))
+      addOrder() {
+        const db = getDb();
+        return this.getCart()
+          .then(products => {
+            const order = {
+              items: products,
+              user: {
+                _id: new ObjectId(this._id),
+                name: this.name
+              }
+            };
+            return db.collection('orders').insertOne(order);
+          })
+          .then(result => {
+            this.cart = { items: [] };
+            return db
+              .collection('users')
+              .updateOne(
+                { _id: new ObjectId(this._id) },
+                { $set: { cart: { items: [] } } }
+              );
+          });
       }
-
-      getOrders(){
-        const db=getDb()
-        return db.collection('orders').find() //inside the find pass the id for the user to identify the order associated with the user
-        .next() //since here only 1 document in orders and only 1 user
-        // will later change to accomodate all the other multiple orders of multipkle users
-        .then(orders=>{
-          // console.log(orders);
-          return orders.items
-          
-        })
-        .catch()
+    
+      getOrders() {
+        const db = getDb();
+        return db
+          .collection('orders')
+          .find({ 'user._id': new ObjectId(this._id) })
+          .toArray();
       }
+    
 
       getCart() {
         const db = getDb();
