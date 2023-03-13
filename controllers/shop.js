@@ -44,44 +44,51 @@ exports.getCart = (req, res, next) => {
 
   exports.createOrder=(req,res,next)=>{
     let fetchCart
-    req.user.getCart()
-    .then(cart=>{
-      fetchCart=cart
-      return cart.getProducts()
+    req.user.addOrder()
+    .then(result=>{
+      console.log('ordered successfully');
+      res.redirect('/orders')
     })
-    .then(products=>{
-      console.log(products);
-      return req.user.createOrder().then(order=>{
-        // res.render('shop/checkout.ejs')
-        return order.addProducts(products.map(product=>{
-          product.orderItem={quantity: product.cartItem.quantity}
-          return product; // make changes and returns each product, this map is a js function
-        }))
-      })
-      .then(()=>{
-        return fetchCart.setProducts(null)
-        
-      })
-      .then(()=>{
-        res.redirect('/orders')
-      })
-
-    })
-    .catch(err=>{
-      console.log(err);
-    })
+    .catch()
+    
   }
 
   exports.getOrders=(req,res,next)=>{
-    req.user.getOrders({include: ['products']}).then(orders=>{ //returns an array of orders with products per order. This is only becuase we defined an association between the orders and products in app.js.
+
+    let products=req.user.getOrders().then(orderItems=>{ //returns an array of orders with products per order. This is only becuase we defined an association between the orders and products in app.js.
       //alternatively we can fetch the products associated with the orders ourselves and send it to the response.
       // return orders.getProducts()[0] // see the alternate branch for more clarity
-      res.render("shop/orders",{
-        pageTitle: "Orders",
-        path: '/orders',
-        orders: orders
+      
+
+      Product.fetchAll().then(products=>{
+        // console.log(products)
+        let new_products=[]
+        for(let product of products){
+          for(let orderItem of orderItems){
+            console.log(orderItem);
+            if (orderItem.productId.toString()===product._id.toString())
+            {
+              const new_product={...product,quantity:orderItem.quantity}
+              // console.log(new_product);
+              new_products.push(new_product)
+              break
+            }
+          }
+        }
+
+        res.render("shop/orders",{
+          pageTitle: "Orders",
+          path: '/orders',
+          orders: new_products
+        })
+
       })
-    }).catch(err=>{
+      // .filter(prod=>{ //this filter is basically n^2 can actually use map function instead
+      //   return prod._id==orderItems._id    //good methid but will increase latency to fetch all products if thoussands of products and only few products to order
+      // })
+  
+    })
+    .catch(err=>{
       console.log(err);
     })
     //input this in the last then block

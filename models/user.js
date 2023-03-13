@@ -59,6 +59,29 @@ class User{
             { $set: { cart: {items: updatedCartItems} } } //can delete the item from the cart as well but yeah!!
           );
       }
+      // {cart:{items:[]}}
+
+      addOrder(){
+        const db=getDb() //an order must also be associated with the user
+        return db.collection('orders').insertOne(this.cart).then(()=>{
+          this.cart={items:[]}
+          return db.collection('users').updateOne({_id:this._id},{$set:{cart:{items:[]}}})
+        })
+        .catch(err=>console.log(err))
+      }
+
+      getOrders(){
+        const db=getDb()
+        return db.collection('orders').find() //inside the find pass the id for the user to identify the order associated with the user
+        .next() //since here only 1 document in orders and only 1 user
+        // will later change to accomodate all the other multiple orders of multipkle users
+        .then(orders=>{
+          // console.log(orders);
+          return orders.items
+          
+        })
+        .catch()
+      }
 
       getCart() {
         const db = getDb();

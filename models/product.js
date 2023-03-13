@@ -71,6 +71,10 @@ return db.collection('products').deleteOne({_id: new mongodb.ObjectId(Id)})
 // })
 // .catch()
 }
+// static findAllMatchingProducts(orders){
+//   const db=getDb()
+//   db.collection('products').find()
+// }
 
 }
 
