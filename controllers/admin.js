@@ -19,9 +19,9 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const description = req.body.description;
 
-  const product= new Product(title,description,imageUrl,price,null)
+  const product= new Product(title,description,imageUrl,price,null,req.user._id)
   
-Product.save(product).then(result =>{
+product.save().then(result =>{
     console.log('Added the new product in the db');
     res.redirect('/')
   }).catch(err=>{
@@ -90,10 +90,9 @@ exports.postEditProduct = (req, res, next) => {
   exports.deleteProduct= (req, res, next) =>{
     const prodId=req.body.id
     const price= req.body.price
-    Product.findByPk(prodId).then(product =>{
-      return product.destroy() // another async function hence must use another then
-
-    }).then(result=>{
+    Product.deleteById(prodId)
+    .then(result =>{
+      console.log('deleted'); // another async function hence must use another then
       res.redirect('/admin/products')
     }).catch()
 

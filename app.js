@@ -11,6 +11,7 @@ const shopRouter= require("./routes/shop")
 const path=require("path")
 
 const errorControl = require('./controllers/errorControl.js');
+const User = require("./models/user")
 
 const mongoConnect=require('./util/database').mongoConnect
 
@@ -31,6 +32,14 @@ mongoConnect(client=>{
     app.listen(8000)
 });
 
+app.use((req,res,next)=>{
+    User.findById('640e3d43120be3a1886d6bfe')
+    .then(user=>{
+        req.user= new User(user.name,user.email,user._id,user.cart)
+        next()
+    })
+    .catch()
+})
 
 // // for the admin webpages
 app.use("/admin",adminData) //router has become a middleware now

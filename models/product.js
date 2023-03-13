@@ -4,7 +4,7 @@ const mongodb=require('mongodb')
 
 
 class Product{
-constructor(title,description,imageUrl,price,id){
+  constructor(title,description,imageUrl,price,id,user_id){
   this.title=title;
   if(imageUrl)
   this.imageUrl=imageUrl
@@ -13,6 +13,7 @@ constructor(title,description,imageUrl,price,id){
   this.description=description
   this.price=price
   this._id= id //new mongodb.ObjectId(id)
+  this.user_id=user_id
 }
 
  save() //for connecting to the database and also saving it to the remote  
@@ -21,7 +22,7 @@ constructor(title,description,imageUrl,price,id){
   if(!this._id){
   return getDb().collection('products').insertOne(this) //inserting into the collection called: 'products' in the db mentioned in the datbase file  
  .then(result=>{
-  console.log(result)
+  // console.log(result,this.user_id)
  }).catch(err=>{
   console.log(err);
  })
@@ -60,6 +61,15 @@ static findById(prodID){
   .catch(err=>{
     console.log(err);
   })
+}
+
+static deleteById(Id){
+const db=getDb()
+return db.collection('products').deleteOne({_id: new mongodb.ObjectId(Id)})
+// .then(result=>{
+//   console.log(result);
+// })
+// .catch()
 }
 
 }
