@@ -1,6 +1,7 @@
+const { ObjectId } = require('mongodb');
 const Product = require('../models/product');
-const Cart= require('../models/cart');
-const { where } = require('sequelize');
+// const Cart= require('../models/cart');
+
 
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/add-product', {
@@ -18,16 +19,9 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const description = req.body.description;
 
-  req.user.createProduct({
-    title: title,
-    price:price,
-    imageUrl: (imageUrl) ? imageUrl : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNpoKNNzR1EbNy8sPvwfz1_pHxmK37a7cD8Q&usqp=CAU',
-    description:description,
-    userUserID: req.user.userID
-  }) //this method is created by sequelize based on the asssociation since we have given hasMany association 
-// check the docs for more info
+  const product= new Product(title,description,imageUrl,price,null,req.user._id)
   
-.then(result =>{
+product.save().then(result =>{
     console.log('Added the new product in the db');
     res.redirect('/')
   }).catch(err=>{
@@ -37,7 +31,7 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  req.user.getProducts().then(products => {
+  Product.fetchAll().then(products => {
       res.render('admin/products', {
       prods: products,
       pageTitle: 'Admin Products',
@@ -53,8 +47,8 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect('/');
   }
   const prodId = req.params.productId;
-req.user.getProducts({where:{productID:prodId}}).then( products => {
-  const product=products[0]  
+  Product.findById(prodId).then( product => {
+ 
   if (!product) {
       return res.redirect('/');
     }
@@ -73,16 +67,19 @@ exports.postEditProduct = (req, res, next) => {
 
   
   // now change the price of the cart items if the price was modified in the process of editing.
-  Product.findByPk(prodId).then( product => {
+  Product.findById(prodId).then( product => {
     if (!product) {
       return res.redirect('/');
     }
-    product.title=req.body.title;
-    product.price=req.body.price;
-    product.imageUrl=req.body.imageUrl;
-    product.description=req.body.description;
+    // console.log(product,req.body.description);
+  
+    const updatedProduct= new Product(req.body.title,req.body.description,req.body.imageUrl,req.body.price,product._id)
+    // product._id is already a ObjectId but prodId is not hence passed this
+     console.log(product)
 
-    return product.save(); //another async function, second then is for the 
+    // product.save(); this wont work cuz product is not an object of the Product class its just a document, an unkown object in json format//another async function, second then is for the this
+    // rather create new object or make save as static
+    return updatedProduct.save()
   }).then(result=>{
     console.log('saved successfully');
     res.redirect('/admin/products')
@@ -93,10 +90,9 @@ exports.postEditProduct = (req, res, next) => {
   exports.deleteProduct= (req, res, next) =>{
     const prodId=req.body.id
     const price= req.body.price
-    Product.findByPk(prodId).then(product =>{
-      return product.destroy() // another async function hence must use another then
-
-    }).then(result=>{
+    Product.deleteById(prodId)
+    .then(result =>{
+      console.log('deleted'); // another async function hence must use another then
       res.redirect('/admin/products')
     }).catch()
 

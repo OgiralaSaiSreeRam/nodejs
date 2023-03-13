@@ -14,9 +14,9 @@ router.get('/products', adminController.getProducts);
 
 // /admin/add-product => POST
 router.post('/add-product', adminController.postAddProduct);
-// to edit the product info
+// // to edit the product info
 router.get('/edit-product/:productId', adminController.getEditProduct);
-// to save the details of the product after editing
+// // to save the details of the product after editing
 router.post('/edit-product', adminController.postEditProduct);
 
 router.post('/delete-product', adminController.deleteProduct);
