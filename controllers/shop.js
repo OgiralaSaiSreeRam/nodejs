@@ -6,7 +6,7 @@ const User=require('../models/user')
 
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll().then(products => {
+  Product.find().then(products => { //this is a static methos given by mongoose
     res.render("shop/product-list", {
       prods:products,
       pageTitle:'Shop',
@@ -19,7 +19,7 @@ exports.getProducts = (req, res, next) => {
 
 exports.getIndex = (req, res, next) => {
   
-  Product.fetchAll().then(products =>{
+  Product.find().then(products =>{
     res.render("shop/index", {
       prods:products,
       pageTitle:'Shop',
@@ -97,7 +97,7 @@ exports.getProductDetails= (req,res,next) => {
   const prodID=req.params.productID
   console.log(prodID);
   // Product.findAll({where: productID=2}).then(....)... also works
-  Product.findById(prodID).then((product)=>{
+  Product.findById(prodID).then((product)=>{ //findById is also a static method given by mongoose to fetch a single document
     console.log(product._id);
     res.render('shop/product-detail',{
       product: product,
