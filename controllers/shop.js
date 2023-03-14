@@ -11,11 +11,12 @@ exports.getProducts = (req, res, next) => {
   .select('title imageUrl price description')//selecting only thise fields that we want.
   .populate('userId','name')//populate method will fetch the entire referenced object instead of just the id. and the next paramter is for the fields in the retrieved object
   .then(products => { //this is a static methos given by mongoose
-    console.log(products);
+    // console.log(products);
     res.render("shop/product-list", {
       prods:products,
       pageTitle:'Shop',
       path:'/products'
+      ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
     })
   }).catch(err =>{
     console.log(err);
@@ -29,6 +30,7 @@ exports.getIndex = (req, res, next) => {
       prods:products,
       pageTitle:'Shop',
       path:'/'
+      ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
     })
   }).catch(err=>{
     console.log(err);
@@ -41,12 +43,13 @@ exports.getCart = (req, res, next) => {
   // .execPopulate()
   .then(users =>{
       const products=users.cart.items
-      console.log(users.cart.items);
+      // console.log(users.cart.items);
       // console.log(products);
       res.render('shop/cart', {
         path: '/cart',
         pageTitle: 'Your Cart',
         products: products
+        ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
       })
     })
   }
@@ -83,6 +86,7 @@ exports.getCart = (req, res, next) => {
           path: '/orders',
           pageTitle: 'Your Orders',
           orders: orders
+          ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
         });
       })
       .catch(err => console.log(err));
@@ -110,6 +114,7 @@ exports.getCheckout = (req, res, next) => {
   res.render('shop/checkout', {
     path: '/checkout',
     pageTitle: 'Checkout'
+    ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
   });
 };
 
@@ -119,18 +124,19 @@ exports.getProductDetails= (req,res,next) => {
   console.log(prodID);
   // Product.findAll({where: productID=2}).then(....)... also works
   Product.findById(prodID).then((product)=>{ //findById is also a static method given by mongoose to fetch a single document
-    console.log(product._id);
+    // console.log(product._id);
     res.render('shop/product-detail',{
       product: product,
       path: '/products',
       pageTitle: 'Product Details'
+      ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
     })}).catch(err=>console.log(err));
   
 }
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  console.log(prodId);
+  // console.log(prodId);
   req.user
     .deleteItemFromCart(prodId)
     .then(result => {
