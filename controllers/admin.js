@@ -1,5 +1,6 @@
-const { ObjectId } = require('mongodb');
+// const { ObjectId } = require('mongodb');
 const Product = require('../models/product');
+const mongoose=require('mongoose')
 // const Cart= require('../models/cart');
 
 
@@ -15,11 +16,11 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const imageUrl = req.body.imageUrl ? req.body.imageUrl : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNpoKNNzR1EbNy8sPvwfz1_pHxmK37a7cD8Q&usqp=CAU';
   const price = req.body.price;
   const description = req.body.description;
 
-  const product= new Product(title,description,imageUrl,price,null,req.user._id)
+  const product= new Product({title:title,description:description,imageUrl:imageUrl,price:price,userId:req.user}) //even tho we give just the user object, mongoose will automatically only take the reference. we can also explicitly pass only the req.user._id
   
 product.save().then(result =>{
     console.log('Added the new product in the db');
@@ -31,7 +32,7 @@ product.save().then(result =>{
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll().then(products => {
+  Product.find().then(products => {
       res.render('admin/products', {
       prods: products,
       pageTitle: 'Admin Products',
@@ -72,15 +73,14 @@ exports.postEditProduct = (req, res, next) => {
       return res.redirect('/');
     }
     // console.log(product,req.body.description);
-  
-    const updatedProduct= new Product(req.body.title,req.body.description,req.body.imageUrl,req.body.price,product._id)
-    // product._id is already a ObjectId but prodId is not hence passed this
-     console.log(product)
+    product.title=req.body.title
+    product.price=req.body.price
+    product.description=req.body.description
+    product.imageUrl=req.body.imageUrl
 
-    // product.save(); this wont work cuz product is not an object of the Product class its just a document, an unkown object in json format//another async function, second then is for the this
-    // rather create new object or make save as static
-    return updatedProduct.save()
-  }).then(result=>{
+    return product.save() 
+    //using this return will give the object to the parent method which will again execute the next then method.
+  }).then(result=>{ //this then method is executed because the inside the previous then a return was executed which returns back to the original parent method, and then execution continues from there, but since parent receives a new object again, it will execute the next then method.
     console.log('saved successfully');
     res.redirect('/admin/products')
   }).catch(err=>console.log(err));
@@ -89,8 +89,8 @@ exports.postEditProduct = (req, res, next) => {
 
   exports.deleteProduct= (req, res, next) =>{
     const prodId=req.body.id
-    const price= req.body.price
-    Product.deleteById(prodId)
+
+    Product.findByIdAndDelete(prodId)
     .then(result =>{
       console.log('deleted'); // another async function hence must use another then
       res.redirect('/admin/products')

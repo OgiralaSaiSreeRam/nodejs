@@ -1,12 +1,17 @@
 const Product = require('../models/product');
 const User=require('../models/user')
+const Order=require('../models/order')
 // const Cart = require('../models/cart');
 // const CartItem=require('../models/cart-item')
 // const OrderItem=require('../models/order-item')
 
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll().then(products => {
+  Product.find()
+  .select('title imageUrl price description')//selecting only thise fields that we want.
+  .populate('userId','name')//populate method will fetch the entire referenced object instead of just the id. and the next paramter is for the fields in the retrieved object
+  .then(products => { //this is a static methos given by mongoose
+    console.log(products);
     res.render("shop/product-list", {
       prods:products,
       pageTitle:'Shop',
@@ -19,7 +24,7 @@ exports.getProducts = (req, res, next) => {
 
 exports.getIndex = (req, res, next) => {
   
-  Product.fetchAll().then(products =>{
+  Product.find().then(products =>{
     res.render("shop/index", {
       prods:products,
       pageTitle:'Shop',
@@ -31,8 +36,12 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  req.user.getCart().then(products =>{
-   
+
+  req.user.populate('cart.items.productId')
+  // .execPopulate()
+  .then(users =>{
+      const products=users.cart.items
+      console.log(users.cart.items);
       // console.log(products);
       res.render('shop/cart', {
         path: '/cart',
@@ -42,20 +51,33 @@ exports.getCart = (req, res, next) => {
     })
   }
 
-  exports.createOrder=(req,res,next)=>{
-    let fetchCart
-    req.user.addOrder()
-    .then(result=>{
-      console.log('ordered successfully');
-      res.redirect('/orders')
-    })
-    .catch()
-    
-  }
-
-  exports.getOrders=(req, res, next) => {
+  exports.postOrder = (req, res, next) => {
     req.user
-      .getOrders()
+      .populate('cart.items.productId')
+      .then(user => {
+        const products = user.cart.items.map(i => {
+          return { quantity: i.quantity, product: { ...i.productId._doc } };
+        });
+        const order = new Order({
+          user: {
+            name: req.user.name,
+            userId: req.user
+          },
+          products: products
+        });
+        return order.save();
+      })
+      .then(result => {
+        return req.user.clearCart();
+      })
+      .then(() => {
+        res.redirect('/orders');
+      })
+      .catch(err => console.log(err));
+  };
+  
+  exports.getOrders = (req, res, next) => {
+    Order.find({ 'user.userId': req.user._id })
       .then(orders => {
         res.render('shop/orders', {
           path: '/orders',
@@ -65,7 +87,6 @@ exports.getCart = (req, res, next) => {
       })
       .catch(err => console.log(err));
   };
-
 
   exports.postCart = (req, res, next) => {
     const prodId = req.body.productId;
@@ -97,7 +118,7 @@ exports.getProductDetails= (req,res,next) => {
   const prodID=req.params.productID
   console.log(prodID);
   // Product.findAll({where: productID=2}).then(....)... also works
-  Product.findById(prodID).then((product)=>{
+  Product.findById(prodID).then((product)=>{ //findById is also a static method given by mongoose to fetch a single document
     console.log(product._id);
     res.render('shop/product-detail',{
       product: product,

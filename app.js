@@ -13,7 +13,8 @@ const path=require("path")
 const errorControl = require('./controllers/errorControl.js');
 const User = require("./models/user")
 
-const mongoConnect=require('./util/database').mongoConnect
+// const mongoConnect=require('./util/database').mongoConnect
+const mongoose = require('mongoose')
 
 
 app.set('view engine', 'ejs'); //ejs and pug are built in so need to import and stuff, can directly use in the view engine like this
@@ -27,15 +28,26 @@ app.use(bodyParser.urlencoded({extended:false}))
 // // all static content will be stored here and will be given direct access to the files unlike other.
 app.use(express.static(path.join(__dirname, 'public'))); //serving static content by separating the css files into a separate files, wont work otherwise
 
-mongoConnect(client=>{
-    console.log('connected');
+mongoose
+.connect('mongodb+srv://sreeramogirala:xetroq-wivVym-1hukja@cluster0.zkqhhtn.mongodb.net/shop?retryWrites=true&w=majority')
+.then(result=>{
     app.listen(8000)
-});
+})
+.catch()
 
 app.use((req,res,next)=>{
-    User.findById('640e3d43120be3a1886d6bfe')
-    .then(user=>{
-        req.user= new User(user.name,user.email,user._id,user.cart)
+    User.findById('640fd688e974326c966409d7').then(user=>{ 
+        if(!user){
+            user=new User({
+                name:'Sreeram',
+                email: 'sreeram@google.com',
+                cart:{
+                    items:[]
+                }
+            })
+            user.save()
+        }
+        req.user=user
         next()
     })
     .catch()
