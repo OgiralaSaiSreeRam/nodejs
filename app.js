@@ -42,25 +42,9 @@ mongoose
     app.listen(8000)
 })
 .catch()
+
 app.use(session({secret:'should be a long string',resave:false,saveUninitialized:false,store:store}))
 
-app.use((req,res,next)=>{
-    User.findById('640fd688e974326c966409d7').then(user=>{ 
-        if(!user){
-            user=new User({
-                name:'Sreeram',
-                email: 'sreeram@google.com',
-                cart:{
-                    items:[]
-                }
-            })
-            user.save()
-        }
-        req.user=user
-        next()
-    })
-    .catch()
-})
 
 // // for the admin webpages
 app.use("/admin",adminData) //router has become a middleware now

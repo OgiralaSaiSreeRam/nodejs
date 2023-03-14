@@ -41,22 +41,25 @@ UserSchema.methods.addToCart= function(product){
   }
   
   this.cart.items=updatedCartItems
-  return this.save()
+  
+  // console.log(this.cart.items);
+  // return this.save()// this will automatically return a promise but normal methods will not return a promise
+  return this.cart.items
   
 }
 
 UserSchema.methods.deleteItemFromCart= function(prodId){
   const updatedProducts= this.cart.items.filter(item=>{
-    return item.productId.toString()!==prodId.toString()
+    return item.productId.toString()!==prodId
   })
-  this.cart.items=updatedProducts
-  return this.save()
+  console.log(prodId);
+  // this.cart.items=updatedProducts
+  return updatedProducts
 }
 
 UserSchema.methods.clearCart = function() {
   this.cart = { items: [] };
-  return this.save();
+  return  User.findOne();
 };
-
 
 module.exports=mongoose.model('User',UserSchema)

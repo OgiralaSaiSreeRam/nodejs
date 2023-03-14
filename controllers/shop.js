@@ -39,12 +39,12 @@ exports.getIndex = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
 
-  req.user.populate('cart.items.productId')
+  (User)(req.session.user).populate('cart.items.productId')
   // .execPopulate()
   .then(users =>{
       const products=users.cart.items
       // console.log(users.cart.items);
-      // console.log(products);
+      console.log(products);
       res.render('shop/cart', {
         path: '/cart',
         pageTitle: 'Your Cart',
@@ -55,7 +55,7 @@ exports.getCart = (req, res, next) => {
   }
 
   exports.postOrder = (req, res, next) => {
-    req.user
+    (User)(req.session.user)
       .populate('cart.items.productId')
       .then(user => {
         const products = user.cart.items.map(i => {
@@ -63,24 +63,22 @@ exports.getCart = (req, res, next) => {
         });
         const order = new Order({
           user: {
-            name: req.user.name,
-            userId: req.user
+            name: req.session.user.name,
+            userId: req.session.user
           },
           products: products
         });
         return order.save();
       })
       .then(result => {
-        return req.user.clearCart();
-      })
-      .then(() => {
+        req.session.user.cart.items=[];
         res.redirect('/orders');
       })
       .catch(err => console.log(err));
   };
   
   exports.getOrders = (req, res, next) => {
-    Order.find({ 'user.userId': req.user._id })
+    Order.find({ 'user.userId': req.session.user._id })
       .then(orders => {
         res.render('shop/orders', {
           path: '/orders',
@@ -94,16 +92,21 @@ exports.getCart = (req, res, next) => {
 
   exports.postCart = (req, res, next) => {
     const prodId = req.body.productId;
+    // console.log(prodId);
     let fetchedCart;
     let newQuantity = 1;
-
+    // console.log(req.session.user.cart.items);
    Product.findById(prodId)
     .then(product=>{
-     req.user.addToCart(product).then(result=>{
-      console.log(result);
-      res.redirect('/cart')
-     }) //no need of then if it does not receive anything
-     console.log('added to cart');
+      const user=(User)(req.session.user)
+     items=user.addToCart(product)
+    //  .then(result=>{
+    // }) //no need of then if it does not receive anything
+    req.session.user.cart.items=items
+    console.log(req.session.user.cart.items);
+    res.redirect('/cart')
+    console.log('added to cart');
+     
     })
     .catch()
   
@@ -137,29 +140,28 @@ exports.getProductDetails= (req,res,next) => {
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
   // console.log(prodId);
-  req.user
-    .deleteItemFromCart(prodId)
-    .then(result => {
-      res.redirect('/cart');
-    })
-    .catch(err => console.log(err));
+  const user=(User)(req.session.user)
+  const cartProducts=
+        user.deleteItemFromCart(prodId)
+    // .then(result => {
+    // })
+    req.session.user.cart.items=cartProducts
+    res.redirect('/cart');
+    // .catch(err => console.log(err));
 };
 
 exports.deleteItem=(req,res,next)=>{
   // call delete method of the cart model
   const prodID=req.body.productID
 
-  req.user.getCart()
-  .then(cart=>{
-    console.log(prodID);
-    return cart.getProducts({ where:{productID:prodID}})
-  })
-  .then(products=>{
-    const product=products[0]
-    // product.destroy() this willl destroy the product in the product table also, we only need to delete in the cartItem table
-    return product.cartItem.destroy() //magic made possible by the sequelize
-  })
-  .then(()=>{
+  const user=(User)(req.session.user)
+  user.find()
+  .then(user=>{
+    let new_cartItems=
+    user.cart.items.filter(item=>{
+      return item.prodID.toString()!==prodID.toString()
+    })
+    req.session.user.cart.items=new_cartItems
     res.redirect('/cart')
   })
   .catch(err=>console.log(err))
