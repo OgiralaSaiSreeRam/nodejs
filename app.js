@@ -11,7 +11,7 @@ const shopRouter= require("./routes/shop")
 const path=require("path")
 
 const errorControl = require('./controllers/errorControl.js');
-// const User = require("./models/user")
+const User = require("./models/user")
 
 // const mongoConnect=require('./util/database').mongoConnect
 const mongoose = require('mongoose')
@@ -35,14 +35,23 @@ mongoose
 })
 .catch()
 
-// app.use((req,res,next)=>{
-//     User.findById('640e3d43120be3a1886d6bfe')
-//     .then(user=>{
-//         req.user= new User(user.name,user.email,user._id,user.cart)
-//         next()
-//     })
-//     .catch()
-// })
+app.use((req,res,next)=>{
+    User.findById('640fd688e974326c966409d7').then(user=>{ 
+        if(!user){
+            user=new User({
+                name:'Sreeram',
+                email: 'sreeram@google.com',
+                cart:{
+                    items:[]
+                }
+            })
+            user.save()
+        }
+        req.user=user
+        next()
+    })
+    .catch()
+})
 
 // // for the admin webpages
 app.use("/admin",adminData) //router has become a middleware now

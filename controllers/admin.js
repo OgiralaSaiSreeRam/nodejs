@@ -16,11 +16,11 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const imageUrl = req.body.imageUrl ? req.body.imageUrl : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNpoKNNzR1EbNy8sPvwfz1_pHxmK37a7cD8Q&usqp=CAU';
   const price = req.body.price;
   const description = req.body.description;
 
-  const product= new Product({title:title,description:description,imageUrl:imageUrl,price:price})
+  const product= new Product({title:title,description:description,imageUrl:imageUrl,price:price,userId:req.user}) //even tho we give just the user object, mongoose will automatically only take the reference. we can also explicitly pass only the req.user._id
   
 product.save().then(result =>{
     console.log('Added the new product in the db');

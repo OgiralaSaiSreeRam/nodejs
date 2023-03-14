@@ -6,7 +6,11 @@ const User=require('../models/user')
 
 
 exports.getProducts = (req, res, next) => {
-  Product.find().then(products => { //this is a static methos given by mongoose
+  Product.find()
+  .select('title imageUrl price description')//selecting only thise fields that we want.
+  .populate('userId','name')//populate method will fetch the entire referenced object instead of just the id. and the next paramter is for the fields in the retrieved object
+  .then(products => { //this is a static methos given by mongoose
+    console.log(products);
     res.render("shop/product-list", {
       prods:products,
       pageTitle:'Shop',
@@ -31,8 +35,12 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  req.user.getCart().then(products =>{
-   
+
+  req.user.populate('cart.items.productId')
+  // .execPopulate()
+  .then(users =>{
+      const products=users.cart.items
+      console.log(users.cart.items);
       // console.log(products);
       res.render('shop/cart', {
         path: '/cart',
