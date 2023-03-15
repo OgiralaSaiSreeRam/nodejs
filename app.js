@@ -6,7 +6,8 @@ const session=require('express-session')
 const MongoDBStore=require('connect-mongodb-session')(session)
 const MONGODB_URI='mongodb+srv://sreeramogirala:xetroq-wivVym-1hukja@cluster0.zkqhhtn.mongodb.net/shop?retryWrites=true&w=majority'
 
-
+const csrf=require('csurf')
+const csrfProtection=csrf()
 
 const bodyParser=require("body-parser")
 
@@ -44,13 +45,13 @@ mongoose
 .catch()
 
 app.use(session({secret:'should be a long string',resave:false,saveUninitialized:false,store:store}))
-
+app.use(csrfProtection)
 app.use((req, res, next) => {
     if (!req.session.user) {
       return next();
     }
     // console.log(req.session.user,'yes user');
-    User.findOne({email:'test@test1.com'}) // in all other methods we are taking info from the User model only not session
+    User.findById(req.session.user._id) // in all other methods we are taking info from the User model only not session
       .then(user => {
         // console.log(user);
         req.user = user;
@@ -59,6 +60,12 @@ app.use((req, res, next) => {
         next();
       })
       .catch(err => console.log(err));
+  });
+
+  app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+    next();
   });
 
 // // for the admin webpages

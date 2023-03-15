@@ -1,15 +1,17 @@
 // const { ObjectId } = require('mongodb');
 const Product = require('../models/product');
-const mongoose=require('mongoose')
+const mongoose=require('mongoose');
+const user = require('../models/user');
 // const Cart= require('../models/cart');
 
 
 exports.getAddProduct = (req, res, next) => {
-  res.render('admin/add-product', {
+  res.render('admin/edit-product', {
     pageTitle: 'Add Product',
     path: '/admin/add-product',
     formsCSS: true,
     productCSS: true,
+    editing: false,
     activeAddProduct: true
     ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
   });
@@ -95,8 +97,17 @@ exports.postEditProduct = (req, res, next) => {
 
     Product.findByIdAndDelete(prodId)
     .then(result =>{
-      console.log('deleted'); // another async function hence must use another then
-      res.redirect('/admin/products')
+      user.findById(req.user._id).then(user=>{
+        const items=user.cart.items.filter(item=>{
+          console.log(user.cart.items.productId,prodId);
+          return item.productId.toString()!==prodId
+        })
+        user.cart.items=items
+        user.save().then(result=>{
+          console.log('deleted'); // another async function hence must use another then
+          res.redirect('/admin/products')
+        })
+      })
     }).catch()
 
     
