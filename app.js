@@ -49,10 +49,13 @@ app.use((req, res, next) => {
     if (!req.session.user) {
       return next();
     }
-    User.findById(req.session.user._id) // in all other methods we are taking info from the User model only not session, chceck session db --not updating
+    // console.log(req.session.user,'yes user');
+    User.findOne({email:'test@test1.com'}) // in all other methods we are taking info from the User model only not session
       .then(user => {
+        // console.log(user);
         req.user = user;
-        req.session.user=user
+        req.session.user=user //these method will ensure that the session is updated with the latest info the user has each time a new request is sent to the server
+        // console.log(req.session.user,req.user);
         next();
       })
       .catch(err => console.log(err));
