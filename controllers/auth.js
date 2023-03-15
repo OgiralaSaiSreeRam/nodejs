@@ -30,8 +30,21 @@ exports.getLogin = (req, res, next) => {
       }
       req.session.user=user
       req.session.isLoggedIn = true;
-      res.redirect('/')
+      //if this is not used then webpage will load before loading the data, and this will seem like website is slow.
+      req.session.save(err=>{ //passing inside the save method as callback
+        
+        res.redirect('/') 
+
+      })
   })
   .catch()
+    
+  };
+
+  exports.postLogOut = (req, res, next) => {
+
+    req.session.isLoggedIn = false;
+      req.session.destroy()
+      res.redirect('/')
     
   };

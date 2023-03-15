@@ -45,6 +45,18 @@ mongoose
 
 app.use(session({secret:'should be a long string',resave:false,saveUninitialized:false,store:store}))
 
+app.use((req, res, next) => {
+    if (!req.session.user) {
+      return next();
+    }
+    User.findById(req.session.user._id) // in all other methods we are taking info from the User model only not session, chceck session db --not updating
+      .then(user => {
+        req.user = user;
+        req.session.user=user
+        next();
+      })
+      .catch(err => console.log(err));
+  });
 
 // // for the admin webpages
 app.use("/admin",adminData) //router has become a middleware now

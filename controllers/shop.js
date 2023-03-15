@@ -39,7 +39,7 @@ exports.getIndex = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
 
-  (User)(req.session.user).populate('cart.items.productId')
+ req.user.populate('cart.items.productId')
   // .execPopulate()
   .then(users =>{
       const products=users.cart.items
@@ -55,7 +55,7 @@ exports.getCart = (req, res, next) => {
   }
 
   exports.postOrder = (req, res, next) => {
-    (User)(req.session.user)
+    (req.user)
       .populate('cart.items.productId')
       .then(user => {
         const products = user.cart.items.map(i => {
@@ -63,22 +63,26 @@ exports.getCart = (req, res, next) => {
         });
         const order = new Order({
           user: {
-            name: req.session.user.name,
-            userId: req.session.user
+            name: req.user.name,
+            userId: req.user
           },
           products: products
         });
         return order.save();
       })
       .then(result => {
-        req.session.user.cart.items=[];
-        res.redirect('/orders');
-      })
+        req.user.cart.items=[];
+        req.user.save() //mongoose will save in the user collection/model with the matching _id hence it will work as expected
+        }).then(result=>{
+          
+          res.redirect('/orders');
+        })
+   
       .catch(err => console.log(err));
   };
   
   exports.getOrders = (req, res, next) => {
-    Order.find({ 'user.userId': req.session.user._id })
+    Order.find({ 'user.userId': req.user })
       .then(orders => {
         res.render('shop/orders', {
           path: '/orders',
@@ -95,17 +99,16 @@ exports.getCart = (req, res, next) => {
     // console.log(prodId);
     let fetchedCart;
     let newQuantity = 1;
-    // console.log(req.session.user.cart.items);
+    // console.log(req.user.cart.items);
    Product.findById(prodId)
     .then(product=>{
-      const user=(User)(req.session.user)
-     items=user.addToCart(product)
-    //  .then(result=>{
-    // }) //no need of then if it does not receive anything
-    req.session.user.cart.items=items
-    console.log(req.session.user.cart.items);
-    res.redirect('/cart')
-    console.log('added to cart');
+      (req.user).addToCart(product)
+     .then(result=>{
+       console.log(req.user.cart.items);
+       res.redirect('/cart')
+       console.log('added to cart');
+    }) //no need of then if it does not receive anything
+    // req.user.cart.items=items
      
     })
     .catch()
@@ -140,32 +143,14 @@ exports.getProductDetails= (req,res,next) => {
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
   // console.log(prodId);
-  const user=(User)(req.session.user)
-  const cartProducts=
-        user.deleteItemFromCart(prodId)
-    // .then(result => {
-    // })
-    req.session.user.cart.items=cartProducts
-    res.redirect('/cart');
+console.log(req.user);
+        req.user.deleteItemFromCart(prodId)
+    .then(result => {
+      // req.user.cart.items=cartProducts
+      res.redirect('/cart');
+    })
     // .catch(err => console.log(err));
 };
 
-exports.deleteItem=(req,res,next)=>{
-  // call delete method of the cart model
-  const prodID=req.body.productID
 
-  const user=(User)(req.session.user)
-  user.find()
-  .then(user=>{
-    let new_cartItems=
-    user.cart.items.filter(item=>{
-      return item.prodID.toString()!==prodID.toString()
-    })
-    req.session.user.cart.items=new_cartItems
-    res.redirect('/cart')
-  })
-  .catch(err=>console.log(err))
-  // Cart.deleteByID(req.body.productId, req.body.price)
-  
-}
 

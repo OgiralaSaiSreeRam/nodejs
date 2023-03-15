@@ -41,10 +41,11 @@ UserSchema.methods.addToCart= function(product){
   }
   
   this.cart.items=updatedCartItems
+  // console.log(this);
   
   // console.log(this.cart.items);
   // return this.save()// this will automatically return a promise but normal methods will not return a promise
-  return this.cart.items
+  return this.save()
   
 }
 
@@ -52,14 +53,14 @@ UserSchema.methods.deleteItemFromCart= function(prodId){
   const updatedProducts= this.cart.items.filter(item=>{
     return item.productId.toString()!==prodId
   })
-  console.log(prodId);
-  // this.cart.items=updatedProducts
-  return updatedProducts
+  // console.log(prodId);
+  this.cart.items=updatedProducts
+  return this.save()
 }
 
 UserSchema.methods.clearCart = function() {
   this.cart = { items: [] };
-  return  User.findOne();
+  return  this.save()
 };
 
 module.exports=mongoose.model('User',UserSchema)
