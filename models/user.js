@@ -41,133 +41,26 @@ UserSchema.methods.addToCart= function(product){
   }
   
   this.cart.items=updatedCartItems
+  // console.log(this);
+  
+  // console.log(this.cart.items);
+  // return this.save()// this will automatically return a promise but normal methods will not return a promise
   return this.save()
   
 }
 
 UserSchema.methods.deleteItemFromCart= function(prodId){
   const updatedProducts= this.cart.items.filter(item=>{
-    return item.productId.toString()!==prodId.toString()
+    return item.productId.toString()!==prodId
   })
+  // console.log(prodId);
   this.cart.items=updatedProducts
   return this.save()
 }
 
 UserSchema.methods.clearCart = function() {
   this.cart = { items: [] };
-  return this.save();
+  return  this.save()
 };
-
-// UserSchema.methods.getCart= function(){
-  
-
-//   return User.find().select('cart').populate('productId').then(products=>{
-//     let extracted_products=[]
-//     for(let prod of products.cart.items){
-//       extracted_products.push({...prod.productId,quantity})
-//     }
-//     return extracted_products
-//   })
-//   // const productIds = this.cart.items.map(i => {
-//   //   return i.productId;
-//   // });
-//   // return db
-//   //   .collection('products')
-//   //   .find({ _id: { $in: productIds } })
-//   //   .toArray()
-//   //   .then(products => {
-//   //     return products.map(p => {
-//   //       return {
-//   //         ...p,
-//   //         quantity: this.cart.items.find(i => {
-//   //           return i.productId.toString() === p._id.toString();
-//   //         }).quantity
-//   //       };
-//   //     });
-//   //   });
-
-// }
-
-// class User{
-//     constructor(name,email,id,cart){
-//         this._id=id
-//         this.name=name
-//         this.email=email
-//         this.cart=cart     //cart={items:[{}]}
-//     }
-
-//     save(){
-//         const db= getDb()
-//         return db.collection('users').insertOne(this)
-//         .then(result=>console.log(result))
-//         .catch()
-//     }
-
-//     addToCart(product) {
-//       }
-
-//       deleteItemFromCart(productId) {
-//         console.log(productId);
-//         const updatedCartItems = this.cart.items.filter(item => {
-//           return item.productId.toString() !== productId; 
-//         });
-//         const db = getDb();
-//         return db
-//           .collection('users')
-//           .updateOne(
-//             { _id: new ObjectId(this._id) },
-//             { $set: { cart: {items: updatedCartItems} } } //can delete the item from the cart as well but yeah!!
-//           );
-//       }
-//       // {cart:{items:[]}}
-
-//       addOrder() {
-//         const db = getDb();
-//         return this.getCart()
-//           .then(products => {
-//             const order = {
-//               items: products,
-//               user: {
-//                 _id: new ObjectId(this._id),
-//                 name: this.name
-//               }
-//             };
-//             return db.collection('orders').insertOne(order);
-//           })
-//           .then(result => {
-//             this.cart = { items: [] };
-//             return db
-//               .collection('users')
-//               .updateOne(
-//                 { _id: new ObjectId(this._id) },
-//                 { $set: { cart: { items: [] } } }
-//               );
-//           });
-//       }
-    
-//       getOrders() {
-//         const db = getDb();
-//         return db
-//           .collection('orders')
-//           .find({ 'user._id': new ObjectId(this._id) })
-//           .toArray();
-//       }
-    
-
-//       getCart() {
-//       }
-    
-
-//     static findById(id){
-//         const db=getDb()
-//         return db.collection('users')
-//         .find({_id: new mongodb.ObjectId(id)}) //can also use the findOne(), then no need to use next()
-//         .next()
-//         .then(user=>{
-//             return user
-//         })
-//         .catch()
-//     }
-// }
 
 module.exports=mongoose.model('User',UserSchema)

@@ -11,11 +11,12 @@ exports.getProducts = (req, res, next) => {
   .select('title imageUrl price description')//selecting only thise fields that we want.
   .populate('userId','name')//populate method will fetch the entire referenced object instead of just the id. and the next paramter is for the fields in the retrieved object
   .then(products => { //this is a static methos given by mongoose
-    console.log(products);
+    // console.log(products);
     res.render("shop/product-list", {
       prods:products,
       pageTitle:'Shop',
       path:'/products'
+      ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
     })
   }).catch(err =>{
     console.log(err);
@@ -29,6 +30,7 @@ exports.getIndex = (req, res, next) => {
       prods:products,
       pageTitle:'Shop',
       path:'/'
+      ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
     })
   }).catch(err=>{
     console.log(err);
@@ -37,22 +39,23 @@ exports.getIndex = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
 
-  req.user.populate('cart.items.productId')
+ req.user.populate('cart.items.productId')
   // .execPopulate()
   .then(users =>{
       const products=users.cart.items
-      console.log(users.cart.items);
-      // console.log(products);
+      // console.log(users.cart.items);
+      console.log(products);
       res.render('shop/cart', {
         path: '/cart',
         pageTitle: 'Your Cart',
         products: products
+        ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
       })
     })
   }
 
   exports.postOrder = (req, res, next) => {
-    req.user
+    (req.user)
       .populate('cart.items.productId')
       .then(user => {
         const products = user.cart.items.map(i => {
@@ -68,21 +71,24 @@ exports.getCart = (req, res, next) => {
         return order.save();
       })
       .then(result => {
-        return req.user.clearCart();
-      })
-      .then(() => {
-        res.redirect('/orders');
-      })
+        req.user.cart.items=[];
+        req.user.save() //mongoose will save in the user collection/model with the matching _id hence it will work as expected
+        }).then(result=>{
+          
+          res.redirect('/orders');
+        })
+   
       .catch(err => console.log(err));
   };
   
   exports.getOrders = (req, res, next) => {
-    Order.find({ 'user.userId': req.user._id })
+    Order.find({ 'user.userId': req.user })
       .then(orders => {
         res.render('shop/orders', {
           path: '/orders',
           pageTitle: 'Your Orders',
           orders: orders
+          ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
         });
       })
       .catch(err => console.log(err));
@@ -90,16 +96,20 @@ exports.getCart = (req, res, next) => {
 
   exports.postCart = (req, res, next) => {
     const prodId = req.body.productId;
+    // console.log(prodId);
     let fetchedCart;
     let newQuantity = 1;
-
+    // console.log(req.user.cart.items);
    Product.findById(prodId)
     .then(product=>{
-     req.user.addToCart(product).then(result=>{
-      console.log(result);
-      res.redirect('/cart')
-     }) //no need of then if it does not receive anything
-     console.log('added to cart');
+      (req.user).addToCart(product)
+     .then(result=>{
+       console.log(req.user.cart.items);
+       res.redirect('/cart')
+       console.log('added to cart');
+    }) //no need of then if it does not receive anything
+    // req.user.cart.items=items
+     
     })
     .catch()
   
@@ -110,6 +120,7 @@ exports.getCheckout = (req, res, next) => {
   res.render('shop/checkout', {
     path: '/checkout',
     pageTitle: 'Checkout'
+    ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
   });
 };
 
@@ -119,45 +130,27 @@ exports.getProductDetails= (req,res,next) => {
   console.log(prodID);
   // Product.findAll({where: productID=2}).then(....)... also works
   Product.findById(prodID).then((product)=>{ //findById is also a static method given by mongoose to fetch a single document
-    console.log(product._id);
+    // console.log(product._id);
     res.render('shop/product-detail',{
       product: product,
       path: '/products',
       pageTitle: 'Product Details'
+      ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
     })}).catch(err=>console.log(err));
   
 }
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  console.log(prodId);
-  req.user
-    .deleteItemFromCart(prodId)
+  // console.log(prodId);
+console.log(req.user);
+        req.user.deleteItemFromCart(prodId)
     .then(result => {
+      // req.user.cart.items=cartProducts
       res.redirect('/cart');
     })
-    .catch(err => console.log(err));
+    // .catch(err => console.log(err));
 };
 
-exports.deleteItem=(req,res,next)=>{
-  // call delete method of the cart model
-  const prodID=req.body.productID
 
-  req.user.getCart()
-  .then(cart=>{
-    console.log(prodID);
-    return cart.getProducts({ where:{productID:prodID}})
-  })
-  .then(products=>{
-    const product=products[0]
-    // product.destroy() this willl destroy the product in the product table also, we only need to delete in the cartItem table
-    return product.cartItem.destroy() //magic made possible by the sequelize
-  })
-  .then(()=>{
-    res.redirect('/cart')
-  })
-  .catch(err=>console.log(err))
-  // Cart.deleteByID(req.body.productId, req.body.price)
-  
-}
 

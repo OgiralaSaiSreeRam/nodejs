@@ -11,6 +11,7 @@ exports.getAddProduct = (req, res, next) => {
     formsCSS: true,
     productCSS: true,
     activeAddProduct: true
+    ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
   });
 };
 
@@ -20,7 +21,7 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const description = req.body.description;
 
-  const product= new Product({title:title,description:description,imageUrl:imageUrl,price:price,userId:req.user}) //even tho we give just the user object, mongoose will automatically only take the reference. we can also explicitly pass only the req.user._id
+  const product= new Product({title:title,description:description,imageUrl:imageUrl,price:price,userId:req.session.user}) //even tho we give just the user object, mongoose will automatically only take the reference. we can also explicitly pass only the req.user._id
   
 product.save().then(result =>{
     console.log('Added the new product in the db');
@@ -37,6 +38,7 @@ exports.getProducts = (req, res, next) => {
       prods: products,
       pageTitle: 'Admin Products',
       path: '/admin/products'
+      ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
     });
   })
   .catch(err => console.log(err))
@@ -58,6 +60,7 @@ exports.getEditProduct = (req, res, next) => {
       path: '/admin/edit-product',
       editing: editMode,
       product: product
+      ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
     });
   });
 };
