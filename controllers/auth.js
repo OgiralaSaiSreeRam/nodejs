@@ -1,29 +1,24 @@
 const User=require('../models/user')
 const bcrypt = require('bcryptjs')
 exports.getLogin = (req, res, next) => {
-    // console.log(req.get('Cookie').split('=')[1])
-    // let loggedIn
-    // if (req.get('Cookie')){
-    //     loggedIn=req.get('Cookie').split('=')[1]
-    // }
-
-    // console.log(req.session.isLoggedIn);
+  let message=req.flash('error')
+  message=message.length>0?message[0]:null
     res.render('auth/login', {
       path: '/login',
-      pageTitle: 'Login'
-      ,isAuthenticated: req.session.isLoggedIn
+      pageTitle: 'Login',
+      errorMessage: message
     });
   };
 
   exports.postLogin = (req, res, next) => {
     const email=req.body.email
     const password=req.body.password
-    console.log(email);
+    console.log(req.flash('error'));
     User.findOne({email:email}).then(user=>{ 
       if(!user){
-          
+          req.flash('error','Invalid email/password')
         return res.redirect('/login')
-          // store.user=user
+
       }
       // console.log(user);
       bcrypt.compare(password,user.password).then((result)=>{
@@ -41,7 +36,8 @@ exports.getLogin = (req, res, next) => {
       })
         }
         else
-        res.redirect('/login')
+        // req.flash('error','Invalid email/password')
+        return res.redirect('/login')
       }).catch(err=>{
         console.log(err);
       })
@@ -60,9 +56,12 @@ exports.getLogin = (req, res, next) => {
   };
 
   exports.getSignUp=(req,res,next)=>{
+    let message=req.flash('error')
+    message=message.length>0?message[0]:null
     res.render('auth/signup',{path: '/signup',
-    pageTitle: 'Login'
-    ,isAuthenticated: req.session.isLoggedIn})
+    pageTitle: 'Login',
+    errorMessage: message
+  })
   }
 
   exports.postSignUp=(req,res,next)=>{
@@ -72,7 +71,9 @@ exports.getLogin = (req, res, next) => {
     User.findOne({ email: email })
       .then(userDoc => {
         if (userDoc) {
+          req.flash('error','Username already exists')
           return res.redirect('/signup');
+          
         }
         bcrypt.hash(password,12).then((hashed_password)=>{
           const user = new User({

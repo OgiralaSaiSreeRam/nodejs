@@ -63,7 +63,7 @@ exports.getCart = (req, res, next) => {
         });
         const order = new Order({
           user: {
-            name: req.user.name,
+            email: req.user.email,
             userId: req.user
           },
           products: products
@@ -115,14 +115,6 @@ exports.getCart = (req, res, next) => {
   
   };
   
-
-exports.getCheckout = (req, res, next) => {
-  res.render('shop/checkout', {
-    path: '/checkout',
-    pageTitle: 'Checkout'
-    ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
-  });
-};
 
 exports.getProductDetails= (req,res,next) => {
   // fetch just the product needed i.e prodID from the url

@@ -8,7 +8,7 @@ const MONGODB_URI='mongodb+srv://sreeramogirala:xetroq-wivVym-1hukja@cluster0.zk
 
 const csrf=require('csurf')
 const csrfProtection=csrf()
-
+const flash=require('connect-flash')
 const bodyParser=require("body-parser")
 
 const adminData= require("./routes/admin")
@@ -45,7 +45,8 @@ mongoose
 .catch()
 
 app.use(session({secret:'should be a long string',resave:false,saveUninitialized:false,store:store}))
-app.use(csrfProtection)
+app.use(csrfProtection) //must be used only after the seesion is created since it uses the session in its implementation
+app.use(flash())
 app.use((req, res, next) => {
     if (!req.session.user) {
       return next();
