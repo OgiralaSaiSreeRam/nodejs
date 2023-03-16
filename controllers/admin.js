@@ -35,7 +35,7 @@ product.save().then(result =>{
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.find().then(products => {
+  Product.find({userId: req.user._id}).then(products => {
       res.render('admin/products', {
       prods: products,
       pageTitle: 'Admin Products',
@@ -74,7 +74,7 @@ exports.postEditProduct = (req, res, next) => {
   
   // now change the price of the cart items if the price was modified in the process of editing.
   Product.findById(prodId).then( product => {
-    if (!product) {
+    if (product.userId.toString()!=req.user._id.toString()) { //mongoose will handle only equality when assigning to a the document not in these cases.
       return res.redirect('/');
     }
     // console.log(product,req.body.description);
@@ -95,7 +95,7 @@ exports.postEditProduct = (req, res, next) => {
   exports.deleteProduct= (req, res, next) =>{
     const prodId=req.body.id
 
-    Product.findByIdAndDelete(prodId)
+    Product.deleteOne({_id:prodId,userId:req.user._id})
     .then(result =>{
       user.findById(req.user._id).then(user=>{
         const items=user.cart.items.filter(item=>{
