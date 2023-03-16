@@ -1,15 +1,11 @@
 const User=require('../models/user')
 const bcrypt = require('bcryptjs')
 const crypto=require('crypto')
+const {validationResult}=require('express-validator')
+
 
 const nodemailer=require('nodemailer')
 // const sendgrid=require('nodemailer-sendgrid-transport')
-
-// 
-
-// Uncomment below two lines to configure authorization using: partner-key
-// var partnerKey = defaultClient.authentications['partner-key'];
-// partnerKey.apiKey = 'YOUR API KEY';
 
 
 var transport = nodemailer.createTransport({
@@ -26,20 +22,37 @@ exports.getLogin = (req, res, next) => {
     res.render('auth/login', {
       path: '/login',
       pageTitle: 'Login',
-      errorMessage: message
+      errorMessage: message,
+      oldData:{
+        email:req.body.email? req.body.email:null,
+        password:req.body.password ? req.body.password :null
+      }
     });
   };
 
   exports.postLogin = (req, res, next) => {
     const email=req.body.email
     const password=req.body.password
+    const errors=validationResult(req)
+    if(!errors.isEmpty()){
+      return res.status(422).render('auth/login', {
+        path: '/login',
+        pageTitle: 'Login',
+        errorMessage: errors.array()[0].msg,
+        oldData:{
+          email:email ? email:null,
+          password: password ? password :null,
+        }
+      });
+    }
+    
     // console.log(req.flash('error'));
     User.findOne({email:email}).then(user=>{ 
-      if(!user){
-          req.flash('error','Invalid email/password')
-        return res.redirect('/login')
+      // if(!user){
+      //     req.flash('error','Invalid email/password')
+      //   return res.redirect('/signup')
 
-      }
+      // }
       // console.log(user);
       bcrypt.compare(password,user.password).then((result)=>{
       
@@ -56,7 +69,7 @@ exports.getLogin = (req, res, next) => {
       })
         }
         else
-        // req.flash('error','Invalid email/password')
+        req.flash('error','Invalid username/password')
         return res.redirect('/login')
       }).catch(err=>{
         console.log(err);
@@ -80,14 +93,33 @@ exports.getLogin = (req, res, next) => {
     message=message.length>0?message[0]:null
     res.render('auth/signup',{path: '/signup',
     pageTitle: 'Login',
-    errorMessage: message
+    errorMessage: message,
+    oldData:{
+      email:req.body.email? req.body.email:null,
+      password:req.body.password ? req.body.password :null,
+      confirmPassword: req.body.confirmPassword ? req.body.password :null,
+    }
   })
   }
 
   exports.postSignUp=(req,res,next)=>{
     const email = req.body.email;
     const password = req.body.password;
-    const confirmPassword = req.body.confirmPassword;
+    // const confirmPassword = req.body.confirmPassword; checking at validation at router stage
+    const errors=validationResult(req)
+    console.log(errors.array());
+    if(!errors.isEmpty()){
+      return res.status(422).render('auth/signup', {
+        path: '/signup',
+        pageTitle: 'SignUp',
+        errorMessage: errors.array()[0].msg,
+        oldData:{
+          email:req.body.email? req.body.email:null,
+          password:req.body.password ? req.body.password :null,
+          confirmPassword: req.body.confirmPassword ? req.body.password :null,
+        }
+      });
+    }
     User.findOne({ email: email })
       .then(userDoc => {
         if (userDoc) {
