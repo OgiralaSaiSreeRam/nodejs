@@ -26,7 +26,10 @@
     "mongodb": "^5.1.0",
     "mongoose": "^7.0.1",
     "mysql2": "^3.2.0",
+    "nodemailer": "^6.9.1",
+    "nodemailer-sendgrid-transport": "^0.2.0",
     "pug": "^3.0.2",
-    "sequelize": "^6.29.2"
+    "sequelize": "^6.29.2",
+    "sib-api-v3-sdk": "^8.5.0"
   }
 }

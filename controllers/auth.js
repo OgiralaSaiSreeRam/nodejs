@@ -1,5 +1,24 @@
 const User=require('../models/user')
 const bcrypt = require('bcryptjs')
+
+const nodemailer=require('nodemailer')
+// const sendgrid=require('nodemailer-sendgrid-transport')
+
+// 
+
+// Uncomment below two lines to configure authorization using: partner-key
+// var partnerKey = defaultClient.authentications['partner-key'];
+// partnerKey.apiKey = 'YOUR API KEY';
+
+
+var transport = nodemailer.createTransport({
+  host: "sandbox.smtp.mailtrap.io",
+  port: 2525,
+  auth: {
+    user: "3c13dba5574afc",
+    pass: "14f0b55704d03b"
+  }
+});
 exports.getLogin = (req, res, next) => {
   let message=req.flash('error')
   message=message.length>0?message[0]:null
@@ -87,7 +106,16 @@ exports.getLogin = (req, res, next) => {
       })
       .then(result => {
         res.redirect('/login');
-      })
+        // 
+        
+        return transport.sendMail({
+          to: email,
+          from: 'shop@node-complete.com',
+          subject: 'Signup succeeded!',
+          html: '<h1>You successfully signed up!</h1>'
+        })
+      }).catch(err=>console.log(err))
+    
       .catch(err => {
         console.log(err);
       });
