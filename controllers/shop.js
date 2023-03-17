@@ -1,6 +1,9 @@
 const Product = require('../models/product');
 const User=require('../models/user')
 const Order=require('../models/order')
+const fs = require('fs');
+const PDFDocument=require('pdfkit')
+const path = require('path');
 // const Cart = require('../models/cart');
 // const CartItem=require('../models/cart-item')
 // const OrderItem=require('../models/order-item')
@@ -30,7 +33,7 @@ exports.getIndex = (req, res, next) => {
       prods:products,
       pageTitle:'Shop',
       path:'/'
-      ,isAuthenticated: req.session.isLoggedIn//req.get('Cookie').split('=')[1]
+      // ,isAuthenticated: req.session.isLoggedIn no longer  needed //req.get('Cookie').split('=')[1]
     })
   }).catch(err=>{
     console.log(err);
@@ -144,5 +147,69 @@ console.log(req.user);
     // .catch(err => console.log(err));
 };
 
+exports.getInvoice = (req, res, next) => {
+  const orderId = req.params.orderId;
+  Order.findById(orderId)
+    .then(order => {
+      if (!order) {
+        return next(new Error('No order found.'));
+      }
+      if (order.user.userId.toString() !== req.user._id.toString()) {
+        return next(new Error('Unauthorized'));
+      }
+      const invoiceName = 'invoice-' + orderId + '.pdf';
+      const invoicePath = path.join('data', 'invoices', invoiceName);
+      const pdfDoc= new PDFDocument()
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader(
+        'Content-Disposition',
+        'inline; filename="' + invoiceName + '"'
+      );
+      pdfDoc.pipe(fs.createWriteStream(invoicePath))
+      pdfDoc.pipe(res)
+
+      pdfDoc.fontSize(26).text('Invoice\n',{underline:true})
+        // pdfDoc.text(order.products[0].product.price)
+
+        pdfDoc.text('-----------------------');
+      let totalPrice = 0.00;
+      order.products.forEach(prod => {
+        totalPrice += prod.quantity * prod.product.price;
+        pdfDoc
+          .fontSize(14)
+          .text(
+            prod.product.title +
+              ' - ' +
+              prod.quantity +
+              ' x ' +
+              '$' +
+              prod.product.price
+          );
+      });
+      pdfDoc.text('---');
+      pdfDoc.fontSize(20).text('Total Price: $' + totalPrice.toFixed(2));
+
+      pdfDoc.end()
+      // fs.readFile(invoicePath, (err, data) => {
+      //   if (err) {
+      //     return next(err);
+      //   }
+      //   res.setHeader('Content-Type', 'application/pdf');
+      //   res.setHeader(
+      //     'Content-Disposition',
+      //     'inline; filename="' + invoiceName + '"'
+      //   );
+      //   res.send(data);
+      // });
+      // const file = fs.createReadStream(invoicePath);
+      // res.setHeader('Content-Type', 'application/pdf');
+      // res.setHeader(
+      //   'Content-Disposition',
+      //   'inline; filename="' + invoiceName + '"'
+      // );
+      // file.pipe(res);
+    })
+    .catch(err => next(err));
+};
 
 

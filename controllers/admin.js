@@ -2,6 +2,7 @@
 const Product = require('../models/product');
 const mongoose=require('mongoose');
 const user = require('../models/user');
+const fileHelper=require('../util/file')
 // const Cart= require('../models/cart');
 
 
@@ -19,9 +20,12 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl ? req.body.imageUrl : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNpoKNNzR1EbNy8sPvwfz1_pHxmK37a7cD8Q&usqp=CAU';
+  const image=req.file
+  const imageUrl = image ? image.path : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNpoKNNzR1EbNy8sPvwfz1_pHxmK37a7cD8Q&usqp=CAU';
   const price = req.body.price;
   const description = req.body.description;
+
+  console.log(req.file);
 
   const product= new Product({title:title,description:description,imageUrl:imageUrl,price:price,userId:req.session.user}) //even tho we give just the user object, mongoose will automatically only take the reference. we can also explicitly pass only the req.user._id
   
@@ -75,13 +79,15 @@ exports.postEditProduct = (req, res, next) => {
   // now change the price of the cart items if the price was modified in the process of editing.
   Product.findById(prodId).then( product => {
     if (product.userId.toString()!=req.user._id.toString()) { //mongoose will handle only equality when assigning to a the document not in these cases.
+      fileHelper.deleteFile(product.imageUrl);
       return res.redirect('/');
     }
     // console.log(product,req.body.description);
     product.title=req.body.title
     product.price=req.body.price
     product.description=req.body.description
-    product.imageUrl=req.body.imageUrl
+    const image=req.file
+    product.imageUrl= image ? image.path : product.imageUrl;
 
     return product.save() 
     //using this return will give the object to the parent method which will again execute the next then method.
@@ -95,7 +101,14 @@ exports.postEditProduct = (req, res, next) => {
   exports.deleteProduct= (req, res, next) =>{
     const prodId=req.body.id
 
-    Product.deleteOne({_id:prodId,userId:req.user._id})
+    Product.findById(prodId)
+    .then(product => {
+      if (!product) {
+        return next(new Error('Product not found.'));
+      }
+      fileHelper.deleteFile(product.imageUrl);
+      return Product.deleteOne({ _id: prodId, userId: req.user._id });
+    })
     .then(result =>{
       user.findById(req.user._id).then(user=>{
         const items=user.cart.items.filter(item=>{

@@ -48,7 +48,7 @@ exports.getLogin = (req, res, next) => {
     }
     
     // console.log(req.flash('error'));
-    User.findOne({email:email}).then(user=>{ 
+   return User.findOne({email:email}).then(user=>{ 
       // if(!user){
       //     req.flash('error','Invalid email/password')
       //   return res.redirect('/signup')
@@ -63,7 +63,7 @@ exports.getLogin = (req, res, next) => {
       // console.log(req.session.user);
         req.session.isLoggedIn = true;
       //if this is not used then webpage will load before loading the data, and this will seem like website is slow.
-        req.session.save(err=>{ //passing inside the save method as callback
+        return req.session.save(err=>{ //passing inside the save method as callback
         
         return res.redirect('/') 
 
