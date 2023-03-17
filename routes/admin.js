@@ -21,6 +21,6 @@ router.get('/edit-product/:productId', isAuth,adminController.getEditProduct);
 // // to save the details of the product after editing
 router.post('/edit-product', isAuth,adminController.postEditProduct);
 
-router.post('/delete-product',isAuth, adminController.deleteProduct);
+router.delete('/delete-product/:productId',isAuth, adminController.deleteProduct);//this is an async function but it will only delete products with images stored locally cuz, it throws an error otherwise.
 
 module.exports = router;
