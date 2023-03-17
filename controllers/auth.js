@@ -184,7 +184,7 @@ exports.getLogin = (req, res, next) => {
           res.redirect('/');// will wait at login page till the user accesses the reset link from his mail
           transport.sendMail({
             to: req.body.email,
-            from: 'shop@node-complete.com',
+            from: 'do_not_reply80@outlook.com',
             subject: 'Password reset',
             html: `
               <p>You requested a password reset</p>
