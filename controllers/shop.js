@@ -28,11 +28,27 @@ exports.getProducts = (req, res, next) => {
 
 exports.getIndex = (req, res, next) => {
   
-  Product.find().then(products =>{
+  const page= +req.query.page || 1;
+  const NO_OF_ITEMS_PER_PAGE=3
+  let totalProducts
+  Product.find().countDocuments().then(number=>{
+    totalProducts=number
+    return Product.find()
+  .skip((page-1)*NO_OF_ITEMS_PER_PAGE)
+  .limit(NO_OF_ITEMS_PER_PAGE)
+  })
+  .then(products =>{
     res.render("shop/index", {
       prods:products,
       pageTitle:'Shop',
-      path:'/'
+      path:'/',
+      currentPage: page,
+      totalProducts: totalProducts,
+        hasNextPage: NO_OF_ITEMS_PER_PAGE * page < totalProducts,
+        hasPreviousPage: page > 1,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(totalProducts / NO_OF_ITEMS_PER_PAGE)
       // ,isAuthenticated: req.session.isLoggedIn no longer  needed //req.get('Cookie').split('=')[1]
     })
   }).catch(err=>{
