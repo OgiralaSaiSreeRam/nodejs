@@ -21,12 +21,14 @@ exports.getAddProduct = (req, res, next) => {
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
   const image=req.file
-  const imageUrl = image ? image.path : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNpoKNNzR1EbNy8sPvwfz1_pHxmK37a7cD8Q&usqp=CAU';
+  let imageUrl = image ? image.path : (req.body.imageUrl2)? req.body.imageUrl2:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNpoKNNzR1EbNy8sPvwfz1_pHxmK37a7cD8Q&usqp=CAU';
   const price = req.body.price;
   const description = req.body.description;
 
   console.log(req.file);
-
+  if(imageUrl.startsWith('images')){
+    imageUrl='/'+imageUrl
+  }
   const product= new Product({title:title,description:description,imageUrl:imageUrl,price:price,userId:req.session.user}) //even tho we give just the user object, mongoose will automatically only take the reference. we can also explicitly pass only the req.user._id
   
 product.save().then(result =>{
@@ -99,13 +101,14 @@ exports.postEditProduct = (req, res, next) => {
   }
 
   exports.deleteProduct= (req, res, next) =>{
-    const prodId=req.body.id
+    const prodId=req.params.productId
 
     Product.findById(prodId)
     .then(product => {
       if (!product) {
         return next(new Error('Product not found.'));
       }
+      if(product.imageUrl.startsWith('images'))
       fileHelper.deleteFile(product.imageUrl);
       return Product.deleteOne({ _id: prodId, userId: req.user._id });
     })
@@ -118,10 +121,12 @@ exports.postEditProduct = (req, res, next) => {
         user.cart.items=items
         user.save().then(result=>{
           console.log('deleted'); // another async function hence must use another then
-          res.redirect('/admin/products')
+          res.status(200).json({ message: 'Success!' });
         })
       })
-    }).catch()
+    }).catch(()=>{
+      res.status(500).json({ message: 'Deleting product failed.' });
+    })
 
     
   }
