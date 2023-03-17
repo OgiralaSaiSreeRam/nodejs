@@ -12,9 +12,10 @@
                 <%= errorMessage %>
             </div>
                 <% } %>
+                
             
         <form class="login-form" action="/login" method="POST" >
-            <div class="form-control" class="<%= errors.find(err=>return err.param=='username') ? 'username':'' "> <!--this willl highlight the place where the user has made a mistake-->
+            <div class="form-control">  <!--class="<%=/* errors.find(err=>return err.param=='username') ? 'username':'' */%>" --> <!--this willl highlight the place where the user has made a mistake-->
                 <label for="email">E-Mail</label>
                 <input type="email" name="email" id="email" value="<%= oldData.email%>">
             </div>

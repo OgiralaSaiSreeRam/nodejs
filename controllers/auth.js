@@ -9,11 +9,12 @@ const nodemailer=require('nodemailer')
 
 
 var transport = nodemailer.createTransport({
-  host: "sandbox.smtp.mailtrap.io",
-  port: 2525,
+  service:"hotmail",
+  // host: "sandbox.smtp.mailtrap.io",
+  // port: 2525,
   auth: {
-    user: "3c13dba5574afc",
-    pass: "14f0b55704d03b"
+    user: "do_not_reply80@outlook.com",
+    pass: "Strongpassword"
   }
 });
 exports.getLogin = (req, res, next) => {
@@ -143,10 +144,10 @@ exports.getLogin = (req, res, next) => {
         
         return transport.sendMail({
           to: email,
-          from: 'shop@node-complete.com',
+          from: 'do_not_reply80@outlook.com',
           subject: 'Signup succeeded!',
-          html: '<h1>You successfully signed up!</h1>'
-        })
+          html: '<h1><i>You successfully signed up!</i></h1>'
+        },err=>{console.log(err);})
       }).catch(err=>console.log(err))
     
       .catch(err => {
