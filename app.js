@@ -5,7 +5,7 @@ const app=express()
 const session=require('express-session')
 const MongoDBStore=require('connect-mongodb-session')(session)
 const MONGODB_URI='mongodb+srv://sreeramogirala:xetroq-wivVym-1hukja@cluster0.zkqhhtn.mongodb.net/shop?retryWrites=true&w=majority'
-
+const multer=require('multer')
 const csrf=require('csurf')
 const csrfProtection=csrf()
 const flash=require('connect-flash')
@@ -33,9 +33,34 @@ const store=new MongoDBStore({
     uri:MONGODB_URI,
     collection:'sessions'
 })
+
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'images');
+  },
+  filename: (req, file, cb) => {
+    cb(null, new Date().toISOString() + '-' + file.originalname);
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  if (
+    file.mimetype === 'image/png' ||
+    file.mimetype === 'image/jpg' ||
+    file.mimetype === 'image/jpeg'
+  ) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+
 app.use(bodyParser.urlencoded({extended:false}))
 // // all static content will be stored here and will be given direct access to the files unlike other.
 app.use(express.static(path.join(__dirname, 'public'))); //serving static content by separating the css files into a separate files, wont work otherwise
+
+app.use('/images',express.static(path.join(__dirname, 'images'))); 
+app.use(multer({storage:fileStorage,fileFilter:fileFilter}).single('imageUrl'))
 
 mongoose
 .connect(MONGODB_URI)
