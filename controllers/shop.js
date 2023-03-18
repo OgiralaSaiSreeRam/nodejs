@@ -4,6 +4,8 @@ const Order=require('../models/order')
 const fs = require('fs');
 const PDFDocument=require('pdfkit')
 const path = require('path');
+
+const stripe=require('stripe')('sk_test_51MmoUZD2SxZ8KUFjCDIBrx0xfXv0lYXiuJPCONp3ghqPslcZMnaPcSwOR8MwAI7sn09ZMc0EC7tB3ZQgbzDTLBwG006jJgZhMO')
 // const Cart = require('../models/cart');
 // const CartItem=require('../models/cart-item')
 // const OrderItem=require('../models/order-item')
@@ -63,7 +65,7 @@ exports.getCart = (req, res, next) => {
   .then(users =>{
       const products=users.cart.items
       // console.log(users.cart.items);
-      console.log(products);
+      // console.log(products);
       res.render('shop/cart', {
         path: '/cart',
         pageTitle: 'Your Cart',
@@ -123,7 +125,7 @@ exports.getCart = (req, res, next) => {
     .then(product=>{
       (req.user).addToCart(product)
      .then(result=>{
-       console.log(req.user.cart.items);
+      //  console.log(req.user.cart.items);
        res.redirect('/cart')
        console.log('added to cart');
     }) //no need of then if it does not receive anything
@@ -138,7 +140,7 @@ exports.getCart = (req, res, next) => {
 exports.getProductDetails= (req,res,next) => {
   // fetch just the product needed i.e prodID from the url
   const prodID=req.params.productID
-  console.log(prodID);
+  // console.log(prodID);
   // Product.findAll({where: productID=2}).then(....)... also works
   Product.findById(prodID).then((product)=>{ //findById is also a static method given by mongoose to fetch a single document
     // console.log(product._id);
@@ -154,7 +156,7 @@ exports.getProductDetails= (req,res,next) => {
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
   // console.log(prodId);
-console.log(req.user);
+// console.log(req.user);
         req.user.deleteItemFromCart(prodId)
     .then(result => {
       // req.user.cart.items=cartProducts
@@ -228,4 +230,92 @@ exports.getInvoice = (req, res, next) => {
     .catch(err => next(err));
 };
 
+exports.getCheckout = (req, res, next) => {
+  let products;
+  let total = 0;
+  req.user
+    .populate("cart.items.productId")
+    // .execPopulate()
+    .then((user) => {
+      products = user.cart.items;
+      total = 0;
+      products.forEach((p) => {
+        total += p.quantity * p.productId.price;
+      });
+      console.log(total);
+       return stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        mode: "payment",
+        line_items: products.map((p) => {
+          return {
+            quantity: p.quantity,
+            price_data: {
+              currency: "usd",
+              unit_amount: Math.round(p.productId.price * 100),
+              product_data: {
+                name: p.productId.title,
+                description: p.productId.description,
+              },
+            },
+          };
+        }),
+        customer_email: req.user.email,
+        success_url:
+          req.protocol + "://" + req.get("host") + "/checkout/success",
+        cancel_url: req.protocol + "://" + req.get("host") + "/checkout/cancel",
+      });
+      // console.log('created session');
+    }).then(session=>{
+      console.log(session);
+      res.render("shop/checkout", {
+        path: "/checkout",
+        pageTitle: "Checkout",
+        products: products,
+        totalSum: total.toFixed(2),
+        sessionId: session.id,
+      });
+    })
+    // .then((session) => {
+    //   console.log('success');
+    // })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+};
 
+exports.getCheckoutSuccess = (req, res, next) => {
+  req.user
+    .populate('cart.items.productId')
+    // .execPopulate()
+    .then(user => {
+      const products = user.cart.items.map(i => {
+        return { quantity: i.quantity, product: { ...i.productId._doc } };
+      });
+      const order = new Order({
+        user: {
+          email: req.user.email,
+          userId: req.user
+        },
+        products: products
+      });
+      return order.save();
+    })
+    .then(result => {
+      return req.user.clearCart();
+    })
+    .then(() => {
+      res.redirect('/orders');
+    })
+    .catch(err => {
+      console.log(err);
+      // const error = new Error(err);
+      // error.httpStatusCode = 500;
+      // return next(error);
+    });
+};
+
+exports.getCheckoutCancel=(req,res,next)=>{
+  res.redirect('/')
+}
