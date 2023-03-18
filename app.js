@@ -101,5 +101,16 @@ app.use(shopRouter)
 // // app.listen(8000)
 app.use(loginRouter)
 
+app.get('/500',errorControl.get500)
+
 app.use("/", errorControl.PageNotFound)
 
+app.use((error, req, res, next) => {
+  // res.status(error.httpStatusCode).render(...);
+  // res.redirect('/500');
+  res.status(500).render('500', {
+    pageTitle: 'Error!',
+    path: '/500',
+    isAuthenticated: req.session.isLoggedIn
+  });
+});
