@@ -5,8 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "package.json",
-    "start": "nodemon app.js",
-    "start-server": "node app.js"
+    "start-server": "node app.js",
+    "start": "nodemon app.js"
   },
   "author": "sreeram",
   "license": "ISC",
