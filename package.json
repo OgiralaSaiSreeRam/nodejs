@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
+  "engines": {
+    "node": "19.6.1"
+  },
   "scripts": {
     "test": "package.json",
     "start-server": "node app.js",
-    "start": "nodemon app.js"
+    "start": "NODE_ENV=production nodemon app.js"
   },
   "author": "sreeram",
   "license": "ISC",
