@@ -4,7 +4,7 @@ const express=require("express") //clearly define the imports; all core modules 
 const app=express()
 const session=require('express-session')
 const MongoDBStore=require('connect-mongodb-session')(session)
-const MONGODB_URI='mongodb+srv://sreeramogirala:F5NHgKbO1QYpqLMo@cluster0.zkqhhtn.mongodb.net/shop?retryWrites=true&w=majority'
+const MONGODB_URI=`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.zkqhhtn.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}?retryWrites=true&w=majority`
 const multer=require('multer')
 const csrf=require('csurf')
 const csrfProtection=csrf()
@@ -65,7 +65,7 @@ app.use(multer({storage:fileStorage,fileFilter:fileFilter}).single('imageUrl'))
 mongoose
 .connect(MONGODB_URI)
 .then(result=>{
-    app.listen(8000)
+    app.listen(process.env.PORT || 8000)
 })
 .catch()
 
