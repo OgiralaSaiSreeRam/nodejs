@@ -34,8 +34,8 @@ app.set('views', 'views'); //ejs does not support extending/reusing the already 
     //       contentSecurityPolicy: false,
     //   })
     // );
-const privateKey=fs.readFileSync('server.key')
-const publicKey=fs.readFileSync('server.cert')
+// const privateKey=fs.readFileSync('server.key')
+// const publicKey=fs.readFileSync('server.cert')
     app.use(compression())
     
 // map the routes so that all can be reachable if .use("/") is in the top then other functions will be never be reachable and also donot use next().
