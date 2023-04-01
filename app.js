@@ -28,7 +28,7 @@ const mongoose = require('mongoose')
 
 app.set('view engine', 'ejs'); //ejs and pug are built in so need to import and stuff, can directly use in the view engine like this
 app.set('views', 'views'); //ejs does not support extending/reusing the already written layout views, need a workaround
-app.use(helmet())
+// app.use(helmet()) //uses https routes only so, use https at the listen() for using helmet
 // app.use(
   //   helmet({
     //       contentSecurityPolicy: false,
@@ -78,8 +78,8 @@ app.use(multer({storage:fileStorage,fileFilter:fileFilter}).single('imageUrl'))
 mongoose
 .connect(MONGODB_URI)
 .then(result=>{
-    https.createServer({key:privateKey,cert:publicKey},app)
-    .listen(process.env.PORT || 8000)
+    // https.createServer({key:privateKey,cert:publicKey},app) //for creating our own ssl certificate
+    app.listen(process.env.PORT || 8000)
 })
 .catch()
 
