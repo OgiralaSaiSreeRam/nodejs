@@ -1,7 +1,9 @@
 
 const express=require("express") //clearly define the imports; all core modules in one palce, third party modules in another 
-
+const helmet=require('helmet')
+const compression=require('compression')
 const app=express()
+const fs=require('fs')
 const session=require('express-session')
 const MongoDBStore=require('connect-mongodb-session')(session)
 const MONGODB_URI=`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.zkqhhtn.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}?retryWrites=true&w=majority`
@@ -10,6 +12,7 @@ const csrf=require('csurf')
 const csrfProtection=csrf()
 const flash=require('connect-flash')
 const bodyParser=require("body-parser")
+const https=require('https')
 
 const adminData= require("./routes/admin")
 const shopRouter= require("./routes/shop")
@@ -25,6 +28,16 @@ const mongoose = require('mongoose')
 
 app.set('view engine', 'ejs'); //ejs and pug are built in so need to import and stuff, can directly use in the view engine like this
 app.set('views', 'views'); //ejs does not support extending/reusing the already written layout views, need a workaround
+app.use(helmet())
+// app.use(
+  //   helmet({
+    //       contentSecurityPolicy: false,
+    //   })
+    // );
+const privateKey=fs.readFileSync('server.key')
+const publicKey=fs.readFileSync('server.cert')
+    app.use(compression())
+    
 // map the routes so that all can be reachable if .use("/") is in the top then other functions will be never be reachable and also donot use next().
 // we dont want to send 2 response objects 
 
@@ -65,7 +78,8 @@ app.use(multer({storage:fileStorage,fileFilter:fileFilter}).single('imageUrl'))
 mongoose
 .connect(MONGODB_URI)
 .then(result=>{
-    app.listen(process.env.PORT || 8000)
+    https.createServer({key:privateKey,cert:publicKey},app)
+    .listen(process.env.PORT || 8000)
 })
 .catch()
 
